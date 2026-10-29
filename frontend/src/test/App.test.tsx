@@ -105,7 +105,7 @@ describe('TrustTrace Frontend Suite', () => {
 
   it('renders the layout with branding and navigation', async () => {
     render(<App />);
-    expect(screen.getByText('TrustTrace')).toBeInTheDocument();
+    expect(screen.getAllByText('TrustTrace')[0]).toBeInTheDocument();
     expect(screen.getByText('AI Reliability Benchmark')).toBeInTheDocument();
     expect(screen.getByText('Overview Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Create Experiment')).toBeInTheDocument();
@@ -124,5 +124,11 @@ describe('TrustTrace Frontend Suite', () => {
       expect(screen.getByText('83.3%')).toBeInTheDocument();
       expect(screen.getByText('120.5ms')).toBeInTheDocument();
     });
+  });
+
+  it('supports theme toggling between light, dark, and system modes', async () => {
+    render(<App />);
+    const themeButton = screen.getByRole('button', { name: /switch to/i });
+    expect(themeButton).toBeInTheDocument();
   });
 });

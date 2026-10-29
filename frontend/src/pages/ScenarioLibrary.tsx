@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   AlertTriangle,
   Plus,
@@ -9,14 +9,24 @@ import {
   Edit2,
   X,
   Info,
+  Search,
+  SlidersHorizontal,
+  Zap,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { FaultScenario } from '../types';
+import { StatusBadge } from '../components/StatusBadge';
+import { EmptyState } from '../components/EmptyState';
 
 export const ScenarioLibrary: React.FC = () => {
   const [scenarios, setScenarios] = useState<FaultScenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Modal / Form state
   const [showModal, setShowModal] = useState(false);
@@ -115,23 +125,42 @@ export const ScenarioLibrary: React.FC = () => {
     }
   };
 
+  const filteredScenarios = useMemo(() => {
+    return scenarios.filter((s) => {
+      const matchesSearch =
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.id.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesSeverity =
+        selectedSeverity === 'all' || s.severity.toLowerCase() === selectedSeverity;
+
+      const matchesCategory =
+        selectedCategory === 'all' || s.category.toLowerCase() === selectedCategory;
+
+      return matchesSearch && matchesSeverity && matchesCategory;
+    });
+  }, [scenarios, searchQuery, selectedSeverity, selectedCategory]);
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white flex items-center space-x-2.5">
-            <ShieldAlert className="h-5 w-5 text-rose-400" />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2.5">
+            <ShieldAlert className="h-5 w-5 text-rose-500" />
             <span>Fault Scenario Library</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Standardized catalog of 10 simulated failure modes for reproducible AI agent reliability testing.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Standardized catalog of 10 simulated failure modes for reproducible AI agent reliability
+            testing.
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-colors shadow-sm shadow-indigo-600/30"
+          className="self-start sm:self-auto flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>New Fault Scenario</span>
@@ -139,126 +168,185 @@ export const ScenarioLibrary: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-lg bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs flex items-center space-x-2">
-          <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-400" />
+        <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/40 text-rose-700 dark:text-rose-300 text-xs flex items-center space-x-2">
+          <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-500" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Safety Notice */}
-      <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 flex items-start space-x-3 text-xs text-slate-400">
-        <Info className="h-4 w-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+      {/* Transparency / Safety Notice */}
+      <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-slate-900/40 border border-amber-200/80 dark:border-slate-800 flex items-start space-x-3 text-xs text-slate-600 dark:text-slate-400 shadow-xs">
+        <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
         <p>
-          <strong className="text-slate-300">Safety Notice:</strong> All fault scenarios are simulated
-          entirely inside TrustTrace's controlled internal runtime. No external network traffic, external APIs,
-          or production systems are ever disrupted or attacked.
+          <strong className="text-slate-800 dark:text-slate-200">Safety Notice:</strong> All fault
+          scenarios are simulated strictly within TrustTrace's internal mock execution pipeline. No
+          external network requests, external APIs, or production endpoints are ever compromised,
+          intercepted, or disrupted.
         </p>
       </div>
 
-      {/* Scenarios Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {scenarios.map((s) => (
-          <div
-            key={s.id}
-            className="p-5 rounded-xl bg-[#0f1524] border border-slate-800/80 flex flex-col justify-between space-y-3 hover:border-slate-700 transition-colors"
+      {/* Filter and Search Bar */}
+      <div className="p-3.5 rounded-xl bg-white dark:bg-[#0f172a]/60 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row items-center gap-3">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search scenarios by name, category, or ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <select
+            value={selectedSeverity}
+            onChange={(e) => setSelectedSeverity(e.target.value)}
+            className="flex-1 md:flex-none px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
           >
-            <div>
-              <div className="flex items-start justify-between gap-2">
-                <h2 className="font-semibold text-slate-200 text-sm">{s.name}</h2>
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold ${
-                    s.severity === 'high'
-                      ? 'bg-rose-950/60 text-rose-300 border border-rose-800/40'
-                      : s.severity === 'medium'
-                      ? 'bg-amber-950/60 text-amber-300 border border-amber-800/40'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  {s.severity}
-                </span>
-              </div>
+            <option value="all">All Severities</option>
+            <option value="low">Low Severity</option>
+            <option value="medium">Medium Severity</option>
+            <option value="high">High Severity</option>
+          </select>
 
-              <div className="mt-1 font-mono text-[10px] text-indigo-400 uppercase tracking-wider">
-                Category: {s.category}
-              </div>
-
-              <p className="mt-2 text-xs text-slate-400 line-clamp-3 leading-relaxed">
-                {s.description}
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-slate-800/60 space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
-                <span>Probability: {(s.probability * 100).toFixed(0)}%</span>
-                <span>
-                  {s.deterministic_step !== null
-                    ? `Deterministic (Step ${s.deterministic_step})`
-                    : 'Probabilistic'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] font-mono text-slate-600">ID: {s.id}</span>
-                <button
-                  onClick={() => openEditModal(s)}
-                  className="flex items-center space-x-1 text-xs text-slate-400 hover:text-indigo-300 font-mono"
-                >
-                  <Edit2 className="h-3 w-3" />
-                  <span>Configure</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="flex-1 md:flex-none px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {/* Scenarios Grid */}
+      {filteredScenarios.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredScenarios.map((s) => (
+            <div
+              key={s.id}
+              className="p-5 rounded-xl bg-white dark:bg-[#0f172a]/60 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                    {s.name}
+                  </h2>
+                  <StatusBadge status={s.severity} size="sm" />
+                </div>
+
+                <div className="mt-1.5 inline-block px-2 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 font-medium">
+                  {s.category}
+                </div>
+
+                <p className="mt-2.5 text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                  {s.description}
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  <span>Probability: {(s.probability * 100).toFixed(0)}%</span>
+                  <span>
+                    {s.deterministic_step !== null
+                      ? `Step ${s.deterministic_step}`
+                      : 'Probabilistic'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                    ID: {s.id}
+                  </span>
+                  <button
+                    onClick={() => openEditModal(s)}
+                    className="flex items-center space-x-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors"
+                  >
+                    <Edit2 className="h-3 w-3" />
+                    <span>Configure</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={ShieldAlert}
+          title="No matching scenarios found"
+          description={
+            searchQuery || selectedSeverity !== 'all' || selectedCategory !== 'all'
+              ? 'Try adjusting your search criteria or filters.'
+              : 'The scenario library is empty.'
+          }
+          actionLabel="Clear Filters"
+          onAction={() => {
+            setSearchQuery('');
+            setSelectedSeverity('all');
+            setSelectedCategory('all');
+          }}
+        />
+      )}
 
       {/* Create / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl bg-[#0f1524] border border-slate-800 p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white font-sans">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/75 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white font-sans">
                 {editingScenario ? 'Configure Fault Scenario' : 'Create Custom Fault Scenario'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-3.5 text-xs">
+            <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 mb-1">Scenario Name</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
+                  Scenario Name
+                </label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-[#090d16] border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 mb-1">Description / Trigger Conditions</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
+                  Description / Trigger Conditions
+                </label>
                 <textarea
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg bg-[#090d16] border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-sans"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 mb-1 font-mono">Category</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
+                    Category
+                  </label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
                     disabled={!!editingScenario}
-                    className="w-full px-3 py-2 rounded-lg bg-[#090d16] border border-slate-800 text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>
@@ -269,11 +357,13 @@ export const ScenarioLibrary: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 mb-1 font-mono">Severity</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
+                    Severity
+                  </label>
                   <select
                     value={formSeverity}
                     onChange={(e) => setFormSeverity(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[#090d16] border border-slate-800 text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -284,7 +374,9 @@ export const ScenarioLibrary: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-slate-300 mb-1 font-mono">Probability (0-1)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
+                    Probability (0-1)
+                  </label>
                   <input
                     type="number"
                     step="0.05"
@@ -292,46 +384,50 @@ export const ScenarioLibrary: React.FC = () => {
                     max="1"
                     value={formProb}
                     onChange={(e) => setFormProb(parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#090d16] border border-slate-800 text-slate-100 font-mono"
+                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 mb-1 font-mono">Exact Step (optional)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
+                    Exact Step (opt.)
+                  </label>
                   <input
                     type="number"
                     min="1"
                     placeholder="Step #"
                     value={formStep}
                     onChange={(e) => setFormStep(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#090d16] border border-slate-800 text-slate-100 font-mono"
+                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 mb-1 font-mono">Delay (ms)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
+                    Delay (ms)
+                  </label>
                   <input
                     type="number"
                     min="0"
                     step="50"
                     value={formDelay}
                     onChange={(e) => setFormDelay(parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#090d16] border border-slate-800 text-slate-100 font-mono"
+                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-3.5 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 text-slate-300 font-mono"
+                  className="px-3.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-sm"
+                  className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-xs transition-colors"
                 >
                   Save Scenario
                 </button>
