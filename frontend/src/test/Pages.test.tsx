@@ -159,8 +159,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Configure Reliability Experiment')).toBeInTheDocument();
-      expect(screen.getByText('Create & Execute Experiment')).toBeInTheDocument();
+      expect(screen.getAllByText('New Experiment')[0]).toBeInTheDocument();
+      expect(screen.getByText('Step 1: Experiment Details')).toBeInTheDocument();
+      expect(screen.getByText('Continue to Step 2')).toBeInTheDocument();
     });
   });
 
@@ -171,8 +172,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Recovery Policy Comparison')).toBeInTheDocument();
-      expect(screen.getByText('Detailed Policy Evaluation Matrix')).toBeInTheDocument();
+      expect(screen.getByText('Policy Comparison')).toBeInTheDocument();
+      expect(screen.getByText('Policy Comparison Matrix')).toBeInTheDocument();
+      expect(screen.getByText('Run Comparison Experiment')).toBeInTheDocument();
     });
   });
 
@@ -183,7 +185,7 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Fault Scenario Library')).toBeInTheDocument();
+      expect(screen.getByText('Fault Scenarios')).toBeInTheDocument();
       expect(screen.getByText('Transient Error at Step 1')).toBeInTheDocument();
     });
   });
@@ -195,7 +197,7 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Research Reports & Reproducibility Exports')).toBeInTheDocument();
+      expect(screen.getByText('Reports')).toBeInTheDocument();
       expect(screen.getByText('Export CSV')).toBeInTheDocument();
       expect(screen.getByText('Export JSON')).toBeInTheDocument();
     });

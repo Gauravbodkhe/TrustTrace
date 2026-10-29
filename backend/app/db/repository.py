@@ -274,6 +274,20 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
 
     task_success_rate = (success_count / total_runs) if total_runs > 0 else None
 
+    # Overall recovery success rate across fault-injected runs
+    fault_runs_subquery = select(ExecutionTrace.run_id).where(ExecutionTrace.fault_injected == True).distinct()
+    fault_runs_set = set(db.execute(fault_runs_subquery).scalars().all())
+    if fault_runs_set:
+        recovered_success_query = (
+            select(func.count(ExperimentRun.id))
+            .where(ExperimentRun.id.in_(fault_runs_set))
+            .where(ExperimentRun.outcome == "success")
+        )
+        recovered_cnt = db.execute(recovered_success_query).scalar() or 0
+        recovery_success_rate = round(recovered_cnt / len(fault_runs_set), 4)
+    else:
+        recovery_success_rate = None
+
     avg_latency = db.execute(
         select(func.avg(ExperimentRun.duration_ms))
     ).scalar()
@@ -284,6 +298,7 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
         "total_experiments": total_experiments,
         "total_runs": total_runs,
         "task_success_rate": round(task_success_rate, 4) if task_success_rate is not None else None,
+        "recovery_success_rate": recovery_success_rate,
         "avg_latency_ms": round(float(avg_latency), 1) if avg_latency else None,
         "outcome_distribution": outcome_counts,
         "recent_experiments": recent,

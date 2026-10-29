@@ -155,6 +155,7 @@ export interface DashboardStats {
   total_experiments: number;
   total_runs: number;
   task_success_rate: number | null;
+  recovery_success_rate: number | null;
   avg_latency_ms: number | null;
   outcome_distribution: Record<string, number>;
   recent_experiments: Array<{

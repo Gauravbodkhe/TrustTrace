@@ -61,11 +61,10 @@ export const ResearchReports: React.FC = () => {
       <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
         <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2.5">
           <FileText className="h-5 w-5 text-amber-500" />
-          <span>Research Reports & Reproducibility Exports</span>
+          <span>Reports</span>
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Export standardized experimental benchmarks, statistical metrics, and raw traces for peer
-          review and reproducible scientific evaluation.
+          View and export research results, statistical metrics, and reproducible reports in CSV, JSON, and Markdown formats.
         </p>
       </div>
 

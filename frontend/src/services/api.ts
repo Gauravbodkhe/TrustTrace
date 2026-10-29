@@ -45,7 +45,8 @@ export const api = {
 
   // ─── Experiments ──────────────────────────────────────────────────────────
   experiments: {
-    list: () => request<import('../types').ExperimentListItem[]>('/api/v1/experiments'),
+    list: (limit = 100, offset = 0) =>
+      request<import('../types').ExperimentListItem[]>(`/api/v1/experiments?limit=${limit}&offset=${offset}`),
     get: (id: string) => request<import('../types').Experiment>(`/api/v1/experiments/${id}`),
     create: (data: import('../types').ExperimentCreate) =>
       request<import('../types').Experiment>('/api/v1/experiments', {

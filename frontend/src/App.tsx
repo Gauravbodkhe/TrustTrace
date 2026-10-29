@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './layouts/AppLayout';
 import { Dashboard } from './pages/Dashboard';
 import { CreateExperiment } from './pages/CreateExperiment';
+import { ExperimentsList } from './pages/ExperimentsList';
 import { ExperimentDetails } from './pages/ExperimentDetails';
 import { TraceExplorer } from './pages/TraceExplorer';
 import { PolicyComparison } from './pages/PolicyComparison';
@@ -18,6 +19,7 @@ export const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="experiments" element={<ExperimentsList />} />
             <Route path="experiments/new" element={<CreateExperiment />} />
             <Route path="experiments/:id" element={<ExperimentDetails />} />
             <Route path="comparison" element={<PolicyComparison />} />

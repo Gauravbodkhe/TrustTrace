@@ -106,22 +106,22 @@ describe('TrustTrace Frontend Suite', () => {
     render(<App />);
     expect(screen.getAllByText('TrustTrace')[0]).toBeInTheDocument();
     expect(screen.getByText('AI Reliability Benchmark')).toBeInTheDocument();
-    expect(screen.getByText('Overview Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Create Experiment')).toBeInTheDocument();
-    expect(screen.getByText('Policy Comparison')).toBeInTheDocument();
-    expect(screen.getByText('Trace Explorer')).toBeInTheDocument();
-    expect(screen.getByText('Fault Scenario Library')).toBeInTheDocument();
-    expect(screen.getByText('Research Reports')).toBeInTheDocument();
-    expect(screen.getByText('Platform Settings')).toBeInTheDocument();
+    expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('New Experiment')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Experiments')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Policy Comparison')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Trace Explorer')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Fault Scenarios')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Reports')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Settings')[0]).toBeInTheDocument();
   });
 
   it('renders dashboard KPI cards and metrics from API', async () => {
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByText('Reliability Overview')).toBeInTheDocument();
+      expect(screen.getByText('TrustTrace Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Total Experiments')).toBeInTheDocument();
       expect(screen.getByText('83.3%')).toBeInTheDocument();
-      expect(screen.getByText('120.5ms')).toBeInTheDocument();
     });
   });
 

@@ -145,11 +145,10 @@ export const ScenarioLibrary: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2.5">
             <ShieldAlert className="h-5 w-5 text-rose-500" />
-            <span>Fault Scenario Library</span>
+            <span>Fault Scenarios</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Standardized catalog of 10 simulated failure modes for reproducible AI agent reliability
-            testing.
+            Explore and configure controlled failure modes used to test AI agent reliability and recovery.
           </p>
         </div>
 

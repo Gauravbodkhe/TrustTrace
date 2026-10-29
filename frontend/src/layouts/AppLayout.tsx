@@ -2,19 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
-  FlaskConical,
+  PlusCircle,
+  Layers,
   GitCompare,
   Activity,
   AlertTriangle,
   FileText,
   Settings as SettingsIcon,
-  ShieldAlert,
   Database,
   Menu,
   X,
-  Layers,
-  Sparkles,
-  ChevronRight,
   RefreshCw,
 } from 'lucide-react';
 import { api } from '../services/api';
@@ -50,13 +47,14 @@ export const AppLayout: React.FC = () => {
   }, []);
 
   const navItems = [
-    { to: '/', label: 'Overview Dashboard', icon: LayoutDashboard },
-    { to: '/experiments/new', label: 'Create Experiment', icon: FlaskConical },
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/experiments/new', label: 'New Experiment', icon: PlusCircle },
+    { to: '/experiments', label: 'Experiments', icon: Layers },
     { to: '/comparison', label: 'Policy Comparison', icon: GitCompare },
     { to: '/traces', label: 'Trace Explorer', icon: Activity },
-    { to: '/scenarios', label: 'Fault Scenario Library', icon: AlertTriangle },
-    { to: '/reports', label: 'Research Reports', icon: FileText },
-    { to: '/settings', label: 'Platform Settings', icon: SettingsIcon },
+    { to: '/scenarios', label: 'Fault Scenarios', icon: AlertTriangle },
+    { to: '/reports', label: 'Reports', icon: FileText },
+    { to: '/settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   const sidebarContent = (
@@ -94,14 +92,17 @@ export const AppLayout: React.FC = () => {
       {/* Navigation Links */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <div className="px-3 pb-2 text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500">
-          Experimentation Platform
+          Navigation
         </div>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
             item.to === '/'
               ? location.pathname === '/'
+              : item.to === '/experiments'
+              ? location.pathname === '/experiments'
               : location.pathname.startsWith(item.to);
+
           return (
             <NavLink
               key={item.to}
@@ -167,7 +168,7 @@ export const AppLayout: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Agent Mode:</span>
+              <span>Agent:</span>
               <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                 {health?.mock_mode ? 'Deterministic Mock' : 'Gemini Hybrid'}
               </span>
@@ -230,14 +231,14 @@ export const AppLayout: React.FC = () => {
             {/* Theme Toggle Button */}
             <ThemeToggle />
 
-            {/* Run Experiment Quick CTA */}
+            {/* New Experiment Quick CTA */}
             <NavLink
               to="/experiments/new"
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-xs shadow-indigo-600/30 flex items-center space-x-1.5"
+              className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-xs shadow-indigo-600/30 flex items-center space-x-1.5"
             >
-              <FlaskConical className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Run Experiment</span>
-              <span className="sm:hidden">Run</span>
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">New Experiment</span>
+              <span className="sm:hidden">New</span>
             </NavLink>
           </div>
         </header>
