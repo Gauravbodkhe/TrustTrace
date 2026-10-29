@@ -1,0 +1,236 @@
+# TrustTrace
+
+**AI Agent Reliability Testing and Recovery Platform**  
+*A controlled empirical benchmark for evaluating failure recovery in tool-using AI agents.*
+
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
+[![React 18](https://img.shields.io/badge/react-18-61dafb.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/tests-93%20passed-emerald.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 1. Problem Statement & Research Objective
+
+Tool-using AI agents inevitably encounter runtime exceptions when querying external systems: network timeouts, malformed JSON responses, rate limits, schema mismatches, and transient server outages. Naive retry loops increase latency, inflate API token costs, and risk propagating corrupt data into downstream decision pipelines.
+
+**TrustTrace** provides a controlled, reproducible experimentation environment to:
+- Inject 10 distinct, realistic tool fault scenarios without risking live infrastructure.
+- Evaluate and compare 7 different failure recovery strategies under identical task conditions.
+- Observe chronological step-by-step traces with inputs, outputs, fault markers, and rule-based diagnoses.
+- Compute mathematically grounded metrics: task success rate, recovery success rate, unsafe recovery rate, diagnosis accuracy, latency, and retry counts.
+- Export raw experiment traces to CSV and JSON, and generate Markdown research reports.
+- **Maintain absolute scientific honesty:** Telemetry distinguishes between measured and unavailable values. Zero fabricated statistics.
+
+---
+
+## 2. Research Hypothesis
+
+> *"Can a budget-aware, safety-constrained recovery policy (Policy G) improve task completion for tool-using AI agents without disproportionate increases in latency, API cost, or unsafe recovery decisions?"*
+
+TrustTrace treats this as an empirical research question. Baseline policies (A: Stop, B: Bounded Retry, C: Validation Retry, D: Fallback, E: Safe Stop, F: Clarification) serve as rigorous experimental controls.
+
+---
+
+## 3. Technology Stack
+
+- **Backend:** Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2 (AsyncIO), HTTPX, Pytest.
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS v4, Recharts, React Router v6, Lucide Icons.
+- **Database:** SQLite with Write-Ahead Logging (zero-credential local dev), compatible with Supabase PostgreSQL in production.
+- **AI Integration:** Google Gemini API supported via official Python SDK; complete deterministic MockAgent provided for zero-API-key local testing.
+- **Testing:** Pytest (86 tests) & Vitest (7 tests).
+
+---
+
+## 4. Architecture
+
+```
++-----------------------------------------------------------------------------------+
+|                            TRUSTTRACE RESEARCH DASHBOARD                          |
+|             React 18 • TypeScript • Tailwind CSS • Recharts • Vite                |
+|  [Overview] [Create Exp] [Policy Comparison] [Traces] [Scenarios] [Reports]       |
++-----------------------------------------+-----------------------------------------+
+                                          | REST API (JSON)
++-----------------------------------------v-----------------------------------------+
+|                               FASTAPI ENGINE                                      |
+|  +--------------------+  +--------------------+  +-----------------------------+  |
+|  |     Endpoints      |  |   Agent Runners    |  |     Simulated Registry      |  |
+|  | - /experiments     |  | - MockAgent (v1.0) |  | - search_knowledge_base     |  |
+|  | - /scenarios       |  | - GeminiAgent      |  | - get_record                |  |
+|  | - /traces          |  +---------+----------+  | - validate_data             |  |
+|  | - /metrics         |            |             | - calculate_result          |  |
+|  | - /exports         |            v             | - generate_answer           |  |
+|  +---------+----------+   +-----------------+    +--------------+--------------+  |
+|            |              | Fault Injector  |                   |                 |
+|            |              | (10 scenarios)  |                   |                 |
+|            |              +--------+--------+                   |                 |
+|            |                       v                            |                 |
+|            |              +-----------------+                   |                 |
+|            |              | Diagnosis Engine|                   |                 |
+|            |              +--------+--------+                   |                 |
+|            |                       v                            |                 |
+|            |              +-----------------+                   |                 |
+|            |              | Recovery Engine |<------------------+                 |
+|            |              | (Policies A–G)  |                                     |
+|            |              +--------+--------+                                     |
+|            v                       v                                              |
+|  +-----------------------------------------------------------------------------+  |
+|  |             SQLAlchemy Async Repository (SQLite / Supabase Postgres)        |  |
+|  +-----------------------------------------------------------------------------+  |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+## 5. Repository Structure
+
+```
+TrustTrace/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                     # FastAPI application entry point
+│   │   ├── core/                       # App configuration and redacted logging
+│   │   ├── api/routes/                 # Endpoints (experiments, traces, metrics, etc.)
+│   │   ├── models/                     # SQLAlchemy async ORM models
+│   │   ├── schemas/                    # Pydantic v2 schemas
+│   │   ├── agents/                     # BaseAgent, MockAgent, GeminiAgent
+│   │   ├── tools/                      # In-memory simulated tool registry
+│   │   ├── services/                   # Injector, Diagnoser, Recovery, Metrics
+│   │   └── db/                         # Database engine, repository, benchmark data
+│   ├── tests/                          # Backend Pytest test suite (86 tests)
+│   ├── requirements.txt
+│   ├── pytest.ini
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── layouts/                    # AppLayout with sidebar & status
+│   │   ├── pages/                      # 8 core research views
+│   │   ├── services/                   # Type-safe API client
+│   │   ├── types/                      # TypeScript domain definitions
+│   │   └── test/                       # Vitest component & page tests (7 tests)
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── Dockerfile
+├── docs/                               # Research and architectural documentation
+│   ├── ARCHITECTURE.md
+│   ├── RESEARCH_METHODOLOGY.md
+│   ├── EXPERIMENT_GUIDE.md
+│   ├── DEPLOYMENT.md
+│   └── SECURITY.md
+├── docker-compose.yml
+├── IMPLEMENTATION_PLAN.md
+├── LICENSE
+└── README.md
+```
+
+---
+
+## 6. Getting Started (Windows PowerShell)
+
+### Prerequisites
+- Python 3.11+
+- Node.js 20+ & npm
+
+### Step 1: Clone and Configure Environment
+```powershell
+cd D:\TrustTrace
+Copy-Item backend\.env.example backend\.env
+```
+
+### Step 2: Install and Run Backend
+```powershell
+cd D:\TrustTrace\backend
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+The backend initializes the SQLite database and seeds standard benchmark tasks on first startup.  
+Interactive OpenAPI documentation is live at: `http://127.0.0.1:8000/docs`.
+
+### Step 3: Install and Run Frontend
+In a new terminal:
+```powershell
+cd D:\TrustTrace\frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
+## 7. Running Tests
+
+### Backend Unit & Integration Tests (Pytest)
+```powershell
+cd D:\TrustTrace\backend
+python -m pytest tests/test_backend.py -v
+```
+*Expected: 86 passed tests covering all 10 fault types, 7 policies, tools, diagnosis, and metrics.*
+
+### Frontend Tests (Vitest)
+```powershell
+cd D:\TrustTrace\frontend
+npx vitest run
+```
+*Expected: 7 passed tests covering Layout, Dashboard, Form Controls, Traces, and Comparison Matrix.*
+
+### Production Build Verification
+```powershell
+cd D:\TrustTrace\frontend
+npm run build
+```
+
+---
+
+## 8. Evaluated Recovery Policies
+
+| Policy | Name | Strategy |
+| :--- | :--- | :--- |
+| **Policy A** | Baseline Stop | Halts immediately upon any tool error. Serves as minimal control. |
+| **Policy B** | Bounded Retry | Retries transient errors with exponential backoff up to retry budget. |
+| **Policy C** | Validation Retry | Validates tool output schemas; retries if payload is malformed or invalid. |
+| **Policy D** | Tool Fallback | Dynamically switches to secondary registered tool when primary fails. |
+| **Policy E** | Safe Stop | Halts execution if continuing risks safety violations or data corruption. |
+| **Policy F** | Clarification | Returns structured prompt requesting human intervention. |
+| **Policy G** | Proposed Budget-Aware | Evaluates fault classification, latency/retry budget, fallback tools, and safety constraints. |
+
+---
+
+## 9. Simulated Fault Scenario Catalog
+
+1. `timeout_step1`: Tool call exceeds deadline (simulated timeout).
+2. `tool_unavailable_step2`: Service unavailable (simulated HTTP 503).
+3. `malformed_json_step1`: Broken JSON syntax returned from tool.
+4. `missing_fields_step2`: Missing required keys in tool response dictionary.
+5. `invalid_args_step1`: Bad parameter types supplied to tool.
+6. `empty_response_step2`: HTTP 200 returned with empty body `{}`.
+7. `stale_data_step1`: Outdated data flag returned (72 hours stale).
+8. `transient_error_step1`: Transient server error safe for retry.
+9. `rate_limit_step1`: Simulated HTTP 429 quota exhaustion.
+10. `schema_validation_step2`: Output field types violate expected schema.
+
+---
+
+## 10. Research Reports & Exports
+
+Every experiment records run-level telemetry with exact timestamps, step inputs/outputs (redacted), diagnoses, and recovery decisions.
+
+- **CSV Export:** Run-level tabular data for statistical software (R, Pandas, SPSS).
+- **JSON Export:** Full hierarchical experiment trace data preserving reproducibility.
+- **Markdown Report:** Publication-ready Markdown document detailing methodology, sample size, measured rates, and limitations.
+
+---
+
+## 11. Security Model
+
+- **No Secret Exposure:** API keys and connection strings are stored server-side only.
+- **Sanitized Traces:** Automated redaction of passwords, tokens, and credentials in execution logs.
+- **Safe Sandboxing:** Fault injection is exclusively in-memory simulation; no real external attacks.
+
+---
+
+## 12. License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

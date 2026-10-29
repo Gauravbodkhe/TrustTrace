@@ -1,0 +1,172 @@
+"""
+Benchmark Task Dataset — seeded, versioned tasks for reproducible experiments.
+
+Tasks cover diverse categories: knowledge retrieval, record lookup,
+data validation, calculation, and multi-step research.
+"""
+BENCHMARK_TASKS = [
+    {
+        "id": "task_expense_policy",
+        "name": "Expense Policy Lookup",
+        "description": "What is the company expense policy for receipts and monthly limits?",
+        "category": "knowledge_retrieval",
+        "input_data": {"query": "expense policy limit receipt", "context": []},
+        "expected_output": {
+            "contains_keywords": ["500", "receipt", "travel", "IT"],
+            "confidence": "medium",
+        },
+        "difficulty": "easy",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_refund_policy",
+        "name": "Refund Policy Lookup",
+        "description": "What is the customer refund policy and time limit?",
+        "category": "knowledge_retrieval",
+        "input_data": {"query": "refund policy customer days", "context": []},
+        "expected_output": {
+            "contains_keywords": ["30 days", "receipt", "defective"],
+            "confidence": "medium",
+        },
+        "difficulty": "easy",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_onboarding",
+        "name": "Employee Onboarding Guide",
+        "description": "What are the steps for employee onboarding on the first week?",
+        "category": "knowledge_retrieval",
+        "input_data": {"query": "onboarding employee hr forms training", "context": []},
+        "expected_output": {
+            "contains_keywords": ["HR forms", "manager", "security training", "7 days"],
+            "confidence": "high",
+        },
+        "difficulty": "easy",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_user_lookup",
+        "name": "User Record Lookup",
+        "description": "Retrieve and validate the record for user USR-001 and provide a summary.",
+        "category": "record_lookup",
+        "input_data": {"record_id": "USR-001", "context": []},
+        "expected_output": {
+            "record_found": True,
+            "fields": ["name", "role", "department", "active"],
+        },
+        "difficulty": "medium",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_order_lookup",
+        "name": "Order Status Lookup",
+        "description": "What is the current status and amount of order ORD-001?",
+        "category": "record_lookup",
+        "input_data": {"record_id": "ORD-001", "context": []},
+        "expected_output": {
+            "record_found": True,
+            "fields": ["customer", "amount", "status", "items"],
+        },
+        "difficulty": "medium",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_cost_analysis",
+        "name": "Order Cost Analysis",
+        "description": "Calculate the total and average cost of orders: $149.99, $299.99, and $99.99.",
+        "category": "calculation",
+        "input_data": {"operands": [149.99, 299.99, 99.99], "operations": ["sum", "average"]},
+        "expected_output": {
+            "sum": 549.97,
+            "average": 183.32,
+        },
+        "difficulty": "easy",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_inventory_count",
+        "name": "Inventory Analysis",
+        "description": "How many items are in the product inventory and what is the highest price?",
+        "category": "calculation",
+        "input_data": {"items": [1, 2, 3, 4, 5], "prices": [29.99, 49.99, 99.99]},
+        "expected_output": {
+            "count": 5,
+            "max_price": 99.99,
+        },
+        "difficulty": "easy",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_data_validation",
+        "name": "Expense Claim Validation",
+        "description": "Validate that this expense claim meets company policy: amount=$250, category=travel, approved=True.",
+        "category": "validation",
+        "input_data": {
+            "data": {"amount": 250.00, "category": "travel", "approved": True},
+            "rules": [
+                {"field": "amount", "required": True, "min": 0, "max": 500},
+                {"field": "category", "required": True},
+            ],
+        },
+        "expected_output": {"valid": True, "error_count": 0},
+        "difficulty": "medium",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_schema_check",
+        "name": "Employee Record Schema Check",
+        "description": "Verify that the employee record has valid name, age (18–65), and department fields.",
+        "category": "validation",
+        "input_data": {
+            "data": {"name": "Alice", "age": 30, "department": "Engineering"},
+            "rules": [
+                {"field": "name", "required": True},
+                {"field": "age", "required": True, "min": 18, "max": 65},
+                {"field": "department", "required": True},
+            ],
+        },
+        "expected_output": {"valid": True, "error_count": 0},
+        "difficulty": "medium",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_policy_research",
+        "name": "Multi-Policy Research",
+        "description": "Summarize key company policies on safety procedures and product pricing.",
+        "category": "multi_step_research",
+        "input_data": {"queries": ["safety procedures", "product catalog pricing"]},
+        "expected_output": {
+            "topics_covered": ["safety", "pricing"],
+            "min_context_items": 2,
+        },
+        "difficulty": "hard",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+    {
+        "id": "task_comprehensive_lookup",
+        "name": "Manager and Order Cross-Reference",
+        "description": "Get manager USR-002's details and cross-reference with order ORD-002.",
+        "category": "multi_step_research",
+        "input_data": {"user_id": "USR-002", "order_id": "ORD-002"},
+        "expected_output": {
+            "user_found": True,
+            "order_found": True,
+            "cross_validated": True,
+        },
+        "difficulty": "hard",
+        "version": "1.0",
+        "is_benchmark": True,
+    },
+]
+
+BENCHMARK_TASK_IDS = [t["id"] for t in BENCHMARK_TASKS]
