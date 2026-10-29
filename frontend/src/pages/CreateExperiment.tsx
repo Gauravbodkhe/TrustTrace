@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Task, FaultScenario, RecoveryPolicy, ExperimentCreate } from '../types';
+import { VoiceMicButton } from '../voice/VoiceMicButton';
 
 interface PolicyCardInfo {
   id: string;
@@ -406,9 +407,16 @@ export const CreateExperiment: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Experiment Name <span className="text-rose-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Experiment Name <span className="text-rose-500">*</span>
+                  </label>
+                  <VoiceMicButton
+                    onTranscript={(spokenText) => setName(spokenText)}
+                    size="sm"
+                    title="Voice type experiment name"
+                  />
+                </div>
                 <input
                   type="text"
                   value={name}
@@ -420,9 +428,18 @@ export const CreateExperiment: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Hypothesis / Research Notes (Optional)
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Hypothesis / Research Notes (Optional)
+                  </label>
+                  <VoiceMicButton
+                    onTranscript={(spokenText) =>
+                      setDescription((prev) => (prev ? `${prev} ${spokenText}` : spokenText))
+                    }
+                    size="sm"
+                    title="Voice type hypothesis notes"
+                  />
+                </div>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -709,15 +726,22 @@ export const CreateExperiment: React.FC = () => {
                 Selected: {selectedTaskIds.length} of {tasks.length} tasks
               </span>
 
-              <div className="relative w-48">
+              <div className="relative flex items-center w-56">
                 <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Filter tasks..."
                   value={taskSearch}
                   onChange={(e) => setTaskSearch(e.target.value)}
-                  className="w-full pl-8 pr-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full pl-8 pr-9 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-sans"
                 />
+                <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                  <VoiceMicButton
+                    onTranscript={(spokenText) => setTaskSearch(spokenText)}
+                    size="sm"
+                    title="Voice search benchmark tasks"
+                  />
+                </div>
               </div>
             </div>
 

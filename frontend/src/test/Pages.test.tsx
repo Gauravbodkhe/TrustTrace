@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { CreateExperiment } from '../pages/CreateExperiment';
 import { PolicyComparison } from '../pages/PolicyComparison';
 import { ScenarioLibrary } from '../pages/ScenarioLibrary';
+import { Evidence } from '../pages/Evidence';
 import { ResearchReports } from '../pages/ResearchReports';
 import { Settings } from '../pages/Settings';
 
@@ -144,6 +145,27 @@ vi.mock('../services/api', () => ({
       jsonUrl: vi.fn().mockReturnValue('/api/v1/exports/exp-1/json'),
       reportUrl: vi.fn().mockReturnValue('/api/v1/exports/exp-1/report'),
     },
+    evidence: {
+      list: vi.fn().mockResolvedValue({ evidence_items: [] }),
+      get: vi.fn().mockResolvedValue(null),
+    },
+    reports: {
+      overall: vi.fn().mockResolvedValue({
+        title: 'TrustTrace Overall Research Benchmark Report',
+        subtitle: 'Evaluation of Agent Recovery Strategies under Injected Tool Faults',
+        scope: 'All Completed Experiments',
+        total_experiments: 1,
+        total_runs: 1,
+        overall_success_rate: 1.0,
+        best_policy_summary: 'Policy G achieved highest success rate.',
+        policy_comparison: [],
+        failure_distribution: [],
+        recent_traces: [],
+      }),
+      overallPdfUrl: vi.fn().mockReturnValue('/api/v1/reports/overall/pdf'),
+      overallMarkdownUrl: vi.fn().mockReturnValue('/api/v1/reports/overall/markdown'),
+      experimentPdfUrl: vi.fn().mockReturnValue('/api/v1/reports/exp-1/pdf'),
+    },
   },
 }));
 
@@ -190,6 +212,18 @@ describe('TrustTrace Pages Suite', () => {
     });
   });
 
+  it('renders Evidence page with audit header and tabs', async () => {
+    render(
+      <MemoryRouter>
+        <Evidence />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByText('Evidence & Explainable Results')).toBeInTheDocument();
+      expect(screen.getByText('Sensitive Data & API Keys Redacted')).toBeInTheDocument();
+    });
+  });
+
   it('renders ResearchReports page with export actions', async () => {
     render(
       <MemoryRouter>
@@ -197,9 +231,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Reports')).toBeInTheDocument();
-      expect(screen.getByText('Export CSV')).toBeInTheDocument();
-      expect(screen.getByText('Export JSON')).toBeInTheDocument();
+      expect(screen.getByText('Research Reports & Vector PDF Export')).toBeInTheDocument();
+      expect(screen.getByText('Generate Complete Overall Report')).toBeInTheDocument();
+      expect(screen.getByText('Download Vector PDF')).toBeInTheDocument();
     });
   });
 

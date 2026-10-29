@@ -85,5 +85,58 @@ export const api = {
     csvUrl: (expId: string) => `${BASE_URL}/api/v1/exports/${expId}/csv`,
     jsonUrl: (expId: string) => `${BASE_URL}/api/v1/exports/${expId}/json`,
     reportUrl: (expId: string) => `${BASE_URL}/api/v1/exports/${expId}/report`,
+    pdfUrl: (expId: string) => `${BASE_URL}/api/v1/reports/${expId}/pdf`,
+  },
+
+  // ─── Evidence ──────────────────────────────────────────────────────────────
+  evidence: {
+    list: (params?: {
+      experiment_id?: string;
+      policy_id?: string;
+      scenario_id?: string;
+      outcome?: string;
+      limit?: number;
+      offset?: number;
+    }) => {
+      const q = new URLSearchParams();
+      if (params?.experiment_id) q.set('experiment_id', params.experiment_id);
+      if (params?.policy_id && params.policy_id !== 'all') q.set('policy_id', params.policy_id);
+      if (params?.scenario_id && params.scenario_id !== 'all') q.set('scenario_id', params.scenario_id);
+      if (params?.outcome && params.outcome !== 'all') q.set('outcome', params.outcome);
+      if (params?.limit) q.set('limit', String(params.limit));
+      if (params?.offset) q.set('offset', String(params.offset));
+      const qs = q.toString() ? `?${q.toString()}` : '';
+      return request<{ total: number; limit: number; offset: number; evidence_items: import('../types').EvidenceSummary[] }>(`/api/v1/evidence${qs}`);
+    },
+    get: (runId: string) => request<import('../types').RunEvidence>(`/api/v1/evidence/${runId}`),
+  },
+
+  // ─── Research Reports & PDF ────────────────────────────────────────────────
+  reports: {
+    overall: (params?: { experiment_ids?: string; policy_id?: string; scenario_id?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.experiment_ids) q.set('experiment_ids', params.experiment_ids);
+      if (params?.policy_id && params.policy_id !== 'all') q.set('policy_id', params.policy_id);
+      if (params?.scenario_id && params.scenario_id !== 'all') q.set('scenario_id', params.scenario_id);
+      const qs = q.toString() ? `?${q.toString()}` : '';
+      return request<import('../types').OverallReportData>(`/api/v1/reports/overall${qs}`);
+    },
+    overallPdfUrl: (params?: { experiment_ids?: string; policy_id?: string; scenario_id?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.experiment_ids) q.set('experiment_ids', params.experiment_ids);
+      if (params?.policy_id && params.policy_id !== 'all') q.set('policy_id', params.policy_id);
+      if (params?.scenario_id && params.scenario_id !== 'all') q.set('scenario_id', params.scenario_id);
+      const qs = q.toString() ? `?${q.toString()}` : '';
+      return `${BASE_URL}/api/v1/reports/overall/pdf${qs}`;
+    },
+    overallMarkdownUrl: (params?: { experiment_ids?: string; policy_id?: string; scenario_id?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.experiment_ids) q.set('experiment_ids', params.experiment_ids);
+      if (params?.policy_id && params.policy_id !== 'all') q.set('policy_id', params.policy_id);
+      if (params?.scenario_id && params.scenario_id !== 'all') q.set('scenario_id', params.scenario_id);
+      const qs = q.toString() ? `?${q.toString()}` : '';
+      return `${BASE_URL}/api/v1/reports/overall/markdown${qs}`;
+    },
+    experimentPdfUrl: (expId: string) => `${BASE_URL}/api/v1/reports/${expId}/pdf`,
   },
 };

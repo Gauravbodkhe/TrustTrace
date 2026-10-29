@@ -94,6 +94,27 @@ vi.mock('../services/api', () => ({
       jsonUrl: vi.fn().mockReturnValue('/api/v1/exports/1/json'),
       reportUrl: vi.fn().mockReturnValue('/api/v1/exports/1/report'),
     },
+    evidence: {
+      list: vi.fn().mockResolvedValue({ evidence_items: [] }),
+      get: vi.fn().mockResolvedValue(null),
+    },
+    reports: {
+      overall: vi.fn().mockResolvedValue({
+        title: 'TrustTrace Overall Research Benchmark Report',
+        subtitle: 'Evaluation of Agent Recovery Strategies under Injected Tool Faults',
+        scope: 'All Completed Experiments',
+        total_experiments: 2,
+        total_runs: 6,
+        overall_success_rate: 0.8333,
+        best_policy_summary: 'Policy G achieved highest success rate.',
+        policy_comparison: [],
+        failure_distribution: [],
+        recent_traces: [],
+      }),
+      overallPdfUrl: vi.fn().mockReturnValue('/api/v1/reports/overall/pdf'),
+      overallMarkdownUrl: vi.fn().mockReturnValue('/api/v1/reports/overall/markdown'),
+      experimentPdfUrl: vi.fn().mockReturnValue('/api/v1/reports/1/pdf'),
+    },
   },
 }));
 
@@ -111,7 +132,7 @@ describe('TrustTrace Frontend Suite', () => {
     expect(screen.getAllByText('Experiments')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Policy Comparison')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Trace Explorer')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Fault Scenarios')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Evidence')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Reports')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Settings')[0]).toBeInTheDocument();
   });
@@ -121,7 +142,7 @@ describe('TrustTrace Frontend Suite', () => {
     await waitFor(() => {
       expect(screen.getByText('TrustTrace Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Total Experiments')).toBeInTheDocument();
-      expect(screen.getByText('83.3%')).toBeInTheDocument();
+      expect(screen.getAllByText('83.3%')[0]).toBeInTheDocument();
     });
   });
 

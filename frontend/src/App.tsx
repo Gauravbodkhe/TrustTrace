@@ -9,6 +9,7 @@ import { ExperimentDetails } from './pages/ExperimentDetails';
 import { TraceExplorer } from './pages/TraceExplorer';
 import { PolicyComparison } from './pages/PolicyComparison';
 import { ScenarioLibrary } from './pages/ScenarioLibrary';
+import { Evidence } from './pages/Evidence';
 import { ResearchReports } from './pages/ResearchReports';
 import { Settings } from './pages/Settings';
 
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
             <Route path="experiments/:id" element={<ExperimentDetails />} />
             <Route path="comparison" element={<PolicyComparison />} />
             <Route path="traces" element={<TraceExplorer />} />
+            <Route path="evidence" element={<Evidence />} />
             <Route path="scenarios" element={<ScenarioLibrary />} />
             <Route path="reports" element={<ResearchReports />} />
             <Route path="settings" element={<Settings />} />

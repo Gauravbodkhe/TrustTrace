@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.db import init_db, SessionLocal
 from app.db import repository as repo
-from app.api.routes import health, experiments, scenarios, traces, metrics, exports
+from app.api.routes import health, experiments, scenarios, traces, metrics, exports, evidence, reports
 
 
 @asynccontextmanager
@@ -65,6 +65,8 @@ app.include_router(scenarios.router)
 app.include_router(traces.router)
 app.include_router(metrics.router)
 app.include_router(exports.router)
+app.include_router(evidence.router)
+app.include_router(reports.router)
 
 
 @app.get("/")

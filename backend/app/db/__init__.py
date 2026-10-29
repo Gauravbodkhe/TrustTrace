@@ -23,8 +23,8 @@ if "sqlite" in db_url:
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA busy_timeout=10000")
+        cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
 SessionLocal = sessionmaker(
@@ -38,6 +38,10 @@ SessionLocal = sessionmaker(
 
 def init_db() -> None:
     """Create all tables (development/test only — use migrations in production)."""
+    if "sqlite" in db_url:
+        with engine.connect() as conn:
+            conn.execute(text("PRAGMA journal_mode=WAL"))
+            conn.commit()
     Base.metadata.create_all(engine)
     logger.info("Database tables initialized")
 

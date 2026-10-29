@@ -8,7 +8,10 @@
 [![React 18](https://img.shields.io/badge/react-18-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/tests-93%20passed-emerald.svg)]()
+[![Tests](https://img.shields.io/badge/backend%20tests-106%20passed-emerald.svg)]()
+[![Frontend Tests](https://img.shields.io/badge/frontend%20tests-8%20passed-emerald.svg)]()
+[![Vector PDF](https://img.shields.io/badge/PDF%20Engine-ReportLab-red.svg)]()
+[![Voice Assistant](https://img.shields.io/badge/Voice-Web%20Speech%20API-indigo.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -213,24 +216,51 @@ npm run build
 
 ---
 
-## 10. Research Reports & Exports
+## 10. Research Reports & Vector PDF Exports
 
 Every experiment records run-level telemetry with exact timestamps, step inputs/outputs (redacted), diagnoses, and recovery decisions.
 
-- **CSV Export:** Run-level tabular data for statistical software (R, Pandas, SPSS).
-- **JSON Export:** Full hierarchical experiment trace data preserving reproducibility.
-- **Markdown Report:** Publication-ready Markdown document detailing methodology, sample size, measured rates, and limitations.
+- **Vector PDF Generator (ReportLab & NumberedCanvas):** Generates academic, publication-grade vector PDF reports with running headers, dynamic "Page X of Y" pagination, executive summary, policy matrix tables, fault distributions, threats to validity, and execution trace appendices.
+- **Combined Overall Report:** Aggregates telemetry across all executed experiments or filtered subsets (by policy, scenario, date).
+- **Single-Experiment Focus:** Generates standalone vector PDFs for individual trials.
+- **CSV & JSON Exports:** Raw tabular and hierarchical trace data for R, Pandas, and Python evaluation scripts.
+- **Markdown Export:** Academic markdown document for research paper integration.
+- **Browser Print:** Native print styles formatted for physical printers and PDF printouts.
 
 ---
 
-## 11. Security Model
+## 11. Multi-Layer Evidence & Explainability Engine
 
-- **No Secret Exposure:** API keys and connection strings are stored server-side only.
-- **Sanitized Traces:** Automated redaction of passwords, tokens, and credentials in execution logs.
-- **Safe Sandboxing:** Fault injection is exclusively in-memory simulation; no real external attacks.
+Located at `/evidence`, the Evidence audit panel categorizes experimental results into five distinct, unmingled evidential layers:
+1. **Observed Evidence:** Raw tool invocations, inputs, and outputs with PII/secrets redacted, exact latencies, and tool exit statuses.
+2. **Calculated Metrics:** Wall-clock duration, consumed retry budgets, and token usage.
+3. **Rule-Based Diagnosis:** Deterministic fault identification comparing ground-truth injected faults against diagnosed fault categories and decision chains.
+4. **AI-Generated Explanations:** LLM synthesis providing root-cause hypotheses, recovery assessments, and citations linked to concrete trace events. Explicitly marked with academic disclaimers.
+5. **Missing Evidence Checklist:** Transparently reports unmeasured parameters (e.g., external LLM dollar costs when executing in deterministic mock mode) to prevent fabrication.
 
 ---
 
-## 12. License
+## 12. Interactive Voice Assistant & Voice Typing
+
+TrustTrace includes a hands-free voice control subsystem built using the Web Speech API:
+- **Speech-to-Text Voice Typing:** Integrated into experiment name, research hypothesis, task search, and dashboard filter fields.
+- **Natural Command Parsing:** Maps spoken queries into safe UI actions, including:
+  - `"Compare all recovery policies"` -> navigates to Policy Comparison.
+  - `"Create a new experiment"` -> opens Experiment Creation wizard.
+  - `"Generate overall report"` -> triggers PDF report generation.
+  - `"Explain why this run failed"` -> opens the Evidence audit layer.
+- **Text-to-Speech Synthesis:** Features Play, Pause, Resume, and Stop controls for listening to findings and diagnoses without vocalizing sensitive tokens.
+
+---
+
+## 13. Security & Redaction Model
+
+- **Automated Secret Redaction:** Recursive data sanitization engine (`redactor.py`) masks passwords, auth keys, Bearer tokens, OpenAI/Google API keys, email addresses, and credit card patterns as `[REDACTED_SECRET]` prior to database persistence and UI rendering.
+- **No Secret Exposure:** API keys and connection strings remain strictly server-side.
+- **Safe Sandboxing:** Fault injection is exclusively in-memory simulation without external network threats.
+
+---
+
+## 14. License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

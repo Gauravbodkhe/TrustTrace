@@ -6,29 +6,39 @@ import {
   Layers,
   GitCompare,
   Activity,
-  AlertTriangle,
+  FileCheck2,
   FileText,
   Settings as SettingsIcon,
   Database,
   Menu,
   X,
   RefreshCw,
+  Mic,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { HealthStatus } from '../types';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { VoiceAssistantModal } from '../voice/VoiceAssistantModal';
 
 export const AppLayout: React.FC = () => {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [isHealthy, setIsHealthy] = useState<boolean | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [voiceAssistantOpen, setVoiceAssistantOpen] = useState(false);
   const location = useLocation();
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Listen for custom trigger to open voice assistant from any page
+  useEffect(() => {
+    const handleOpenVoice = () => setVoiceAssistantOpen(true);
+    window.addEventListener('trusttrace:open-voice', handleOpenVoice);
+    return () => window.removeEventListener('trusttrace:open-voice', handleOpenVoice);
+  }, []);
 
   const checkHealth = async () => {
     try {
@@ -52,7 +62,7 @@ export const AppLayout: React.FC = () => {
     { to: '/experiments', label: 'Experiments', icon: Layers },
     { to: '/comparison', label: 'Policy Comparison', icon: GitCompare },
     { to: '/traces', label: 'Trace Explorer', icon: Activity },
-    { to: '/scenarios', label: 'Fault Scenarios', icon: AlertTriangle },
+    { to: '/evidence', label: 'Evidence', icon: FileCheck2 },
     { to: '/reports', label: 'Reports', icon: FileText },
     { to: '/settings', label: 'Settings', icon: SettingsIcon },
   ];
@@ -218,7 +228,7 @@ export const AppLayout: React.FC = () => {
           </div>
 
           {/* Right Action Cluster */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
             {/* Database indicator */}
             <div className="hidden sm:flex items-center space-x-1.5 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
               <Database className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -227,6 +237,17 @@ export const AppLayout: React.FC = () => {
                 {health?.database === 'ok' ? 'Connected' : 'Offline'}
               </span>
             </div>
+
+            {/* Voice Assistant Header Trigger */}
+            <button
+              onClick={() => setVoiceAssistantOpen(true)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-2xs group"
+              title="Open TrustTrace Voice Assistant (Natural commands & speech synthesis)"
+              aria-label="Open Voice Assistant"
+            >
+              <Mic className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Voice Assistant</span>
+            </button>
 
             {/* Theme Toggle Button */}
             <ThemeToggle />
@@ -248,6 +269,12 @@ export const AppLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Global Voice Assistant Modal */}
+      <VoiceAssistantModal
+        isOpen={voiceAssistantOpen}
+        onClose={() => setVoiceAssistantOpen(false)}
+      />
     </div>
   );
 };

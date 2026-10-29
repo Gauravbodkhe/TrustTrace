@@ -241,6 +241,9 @@ def get_recovery_decisions_for_run(db: Session, run_id: str) -> List[RecoveryDec
     return list(result.scalars().all())
 
 
+get_decisions_for_run = get_recovery_decisions_for_run
+
+
 # ─────────────────────────── Metric Summaries ──────────────────────────────
 
 def save_metric_summary(db: Session, summary: Dict[str, Any]) -> MetricSummary:
@@ -293,6 +296,34 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
     ).scalar()
 
     recent = list_experiments(db, limit=5)
+    failure_stats = get_failure_distribution_stats(db)
+
+    # Best performing policy based on highest (task_success_rate + recovery_rate)
+    from app.services.recovery_engine import RECOVERY_POLICIES
+    policy_metrics_rows = []
+    for p_id in RECOVERY_POLICIES.keys():
+        p_runs = db.execute(select(ExperimentRun).where(ExperimentRun.policy_id == p_id)).scalars().all()
+        if p_runs:
+            s_cnt = sum(1 for r in p_runs if r.outcome == "success")
+            sr = round(s_cnt / len(p_runs), 4)
+            policy_metrics_rows.append({
+                "policy_id": p_id,
+                "policy_name": RECOVERY_POLICIES[p_id]["name"],
+                "sample_size": len(p_runs),
+                "task_success_rate": sr,
+            })
+    
+    best_policy_info = None
+    if policy_metrics_rows:
+        best_sorted = sorted(policy_metrics_rows, key=lambda x: x["task_success_rate"], reverse=True)
+        top = best_sorted[0]
+        best_policy_info = {
+            "policy_id": top["policy_id"],
+            "policy_name": top["policy_name"],
+            "sample_size": top["sample_size"],
+            "task_success_rate": top["task_success_rate"],
+            "metric_description": f"Highest task completion ({top['task_success_rate']*100:.0f}%) over n={top['sample_size']} runs across all scenarios",
+        }
 
     return {
         "total_experiments": total_experiments,
@@ -302,4 +333,78 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
         "avg_latency_ms": round(float(avg_latency), 1) if avg_latency else None,
         "outcome_distribution": outcome_counts,
         "recent_experiments": recent,
+        "most_common_failures": failure_stats[:5],
+        "best_policy": best_policy_info,
     }
+
+
+def get_failure_distribution_stats(db: Session) -> list[dict]:
+    """Compute incidence and recovery rates for injected fault categories."""
+    traces = db.execute(
+        select(ExecutionTrace.fault_category, ExecutionTrace.run_id)
+        .where(ExecutionTrace.fault_injected == True)
+        .where(ExecutionTrace.fault_category != None)
+    ).all()
+
+    if not traces:
+        return []
+
+    counts = {}
+    fault_runs: dict[str, set] = {}
+    for cat, run_id in traces:
+        counts[cat] = counts.get(cat, 0) + 1
+        fault_runs.setdefault(cat, set()).add(run_id)
+
+    all_run_ids = {r for s in fault_runs.values() for r in s}
+    successful_run_ids = set()
+    if all_run_ids:
+        successful_run_ids = set(
+            db.execute(
+                select(ExperimentRun.id)
+                .where(ExperimentRun.id.in_(all_run_ids))
+                .where(ExperimentRun.outcome == "success")
+            ).scalars().all()
+        )
+
+    results = []
+    for cat, cnt in sorted(counts.items(), key=lambda x: x[1], reverse=True):
+        runs_for_cat = fault_runs[cat]
+        recovered = len(runs_for_cat.intersection(successful_run_ids))
+        rate = round(recovered / len(runs_for_cat), 4) if runs_for_cat else 0.0
+        results.append({
+            "category": cat,
+            "count": cnt,
+            "unique_runs": len(runs_for_cat),
+            "recovered_runs": recovered,
+            "recovery_rate": rate,
+            "description": f"Simulated fault condition for {cat.replace('_', ' ')}",
+        })
+    return results
+
+
+def list_all_runs(
+    db: Session,
+    experiment_id: str | None = None,
+    experiment_ids: list[str] | None = None,
+    policy_id: str | None = None,
+    scenario_id: str | None = None,
+    outcome: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[ExperimentRun]:
+    """List runs across multiple or all experiments with flexible filters."""
+    query = select(ExperimentRun)
+    if experiment_id:
+        query = query.where(ExperimentRun.experiment_id == experiment_id)
+    if experiment_ids:
+        query = query.where(ExperimentRun.experiment_id.in_(experiment_ids))
+    if policy_id and policy_id != "all":
+        query = query.where(ExperimentRun.policy_id == policy_id)
+    if scenario_id and scenario_id != "all":
+        query = query.where(ExperimentRun.scenario_id == scenario_id)
+    if outcome and outcome != "all":
+        query = query.where(ExperimentRun.outcome == outcome)
+
+    query = query.order_by(ExperimentRun.started_at.desc().nullslast()).offset(offset).limit(limit)
+    return list(db.execute(query).scalars().all())
+
