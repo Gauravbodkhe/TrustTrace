@@ -4,18 +4,10 @@ import {
   Download,
   FileSpreadsheet,
   FileCode,
-  BookOpen,
-  CheckCircle2,
   AlertTriangle,
-  Info,
-  ExternalLink,
-  Layers,
-  Calendar,
-  Hash,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { ExperimentListItem, Experiment, MetricSummary } from '../types';
-import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
 
 export const ResearchReports: React.FC = () => {
@@ -23,7 +15,7 @@ export const ResearchReports: React.FC = () => {
   const [selectedExpId, setSelectedExpId] = useState<string>('');
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [metrics, setMetrics] = useState<MetricSummary[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

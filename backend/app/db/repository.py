@@ -74,19 +74,21 @@ def list_scenarios(db: Session) -> List[FaultScenario]:
     return list(result.scalars().all())
 
 
-def create_scenario(db: Session, data: Dict[str, Any]) -> FaultScenario:
-    scenario_id = data.get("id") or f"custom_{str(uuid.uuid4())[:8]}"
-    scenario = FaultScenario(id=scenario_id, **{k: v for k, v in data.items() if k != "id"})
+def create_scenario(db: Session, data: Any) -> FaultScenario:
+    payload = data.model_dump() if hasattr(data, "model_dump") else dict(data)
+    scenario_id = payload.get("id") or f"custom_{str(uuid.uuid4())[:8]}"
+    scenario = FaultScenario(id=scenario_id, **{k: v for k, v in payload.items() if k != "id"})
     db.add(scenario)
     db.flush()
     return scenario
 
 
-def update_scenario(db: Session, scenario_id: str, updates: Dict[str, Any]) -> Optional[FaultScenario]:
+def update_scenario(db: Session, scenario_id: str, updates: Any) -> Optional[FaultScenario]:
     scenario = db.get(FaultScenario, scenario_id)
     if scenario is None:
         return None
-    for key, val in updates.items():
+    payload = updates.model_dump(exclude_unset=True) if hasattr(updates, "model_dump") else dict(updates)
+    for key, val in payload.items():
         if hasattr(scenario, key) and val is not None:
             setattr(scenario, key, val)
     db.flush()
@@ -95,12 +97,13 @@ def update_scenario(db: Session, scenario_id: str, updates: Dict[str, Any]) -> O
 
 # ─────────────────────────── Experiments ───────────────────────────────────
 
-def create_experiment(db: Session, data: Dict[str, Any]) -> Experiment:
+def create_experiment(db: Session, data: Any) -> Experiment:
+    payload = data.model_dump() if hasattr(data, "model_dump") else dict(data)
     exp = Experiment(
-        id=str(uuid.uuid4()),
+        id=payload.get("id") or str(uuid.uuid4()),
         created_at=_now(),
         updated_at=_now(),
-        **data,
+        **{k: v for k, v in payload.items() if k != "id"},
     )
     db.add(exp)
     db.flush()

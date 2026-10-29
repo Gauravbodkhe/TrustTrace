@@ -2,16 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   GitCompare,
   RotateCcw,
-  CheckCircle2,
-  XCircle,
-  Clock,
   ShieldAlert,
   AlertTriangle,
   Info,
-  TrendingUp,
   BarChart3,
   Award,
-  Zap,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -23,7 +18,6 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { PolicyComparisonResponse } from '../types';
 import { useTheme } from '../context/ThemeContext';

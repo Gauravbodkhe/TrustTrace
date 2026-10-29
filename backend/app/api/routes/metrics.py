@@ -70,14 +70,14 @@ def compare_policies(
         policy_data[policy_id]["traces_by_run"].update(traces_by_run)
 
     rows = []
-    for policy_id, data in policy_data.items():
+    for policy_id, policy_info in RECOVERY_POLICIES.items():
+        data = policy_data.get(policy_id, {"runs": [], "traces_by_run": {}})
         metrics = metrics_engine.compute(
             experiment_id="comparison",
             policy_id=policy_id,
             runs=data["runs"],
             traces_by_run=data["traces_by_run"],
         )
-        policy_info = RECOVERY_POLICIES.get(policy_id, {})
         rows.append({
             "policy_id": policy_id,
             "policy_name": policy_info.get("name", policy_id),

@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, Laptop, ChevronDown } from 'lucide-react';
-import { useTheme, Theme } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface ThemeToggleProps {
   showLabel?: boolean;
   className?: string;
 }
 
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({ showLabel = false, className = '' }) => {
+export const ThemeToggle: React.FC<ThemeToggleProps> = ({ showLabel: _showLabel = false, className = '' }) => {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

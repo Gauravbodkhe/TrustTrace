@@ -3,15 +3,10 @@ import {
   AlertTriangle,
   Plus,
   ShieldAlert,
-  Clock,
-  Sparkles,
-  Check,
   Edit2,
   X,
   Info,
   Search,
-  SlidersHorizontal,
-  Zap,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { FaultScenario } from '../types';
@@ -20,7 +15,7 @@ import { EmptyState } from '../components/EmptyState';
 
 export const ScenarioLibrary: React.FC = () => {
   const [scenarios, setScenarios] = useState<FaultScenario[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Search and filter state
