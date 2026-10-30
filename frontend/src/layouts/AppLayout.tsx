@@ -299,7 +299,11 @@ export const AppLayout: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span>Database:</span>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
-                  {health?.database === 'ok' ? 'Connected (Fast)' : 'Connecting...'}
+                  {health?.database === 'ok'
+                    ? 'Connected (Fast)'
+                    : isHealthy === false
+                    ? 'Offline'
+                    : 'Connecting...'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -378,7 +382,7 @@ export const AppLayout: React.FC = () => {
               <Database className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>DB:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                {health?.database === 'ok' ? 'Connected' : 'Offline'}
+                {health?.database === 'ok' ? 'Connected' : isHealthy === false ? 'Offline' : 'Connecting...'}
               </span>
             </div>
 

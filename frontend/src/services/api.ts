@@ -1,17 +1,40 @@
 // API Service Layer — connects to TrustTrace backend
 // All requests go through this module; no raw fetch() in components.
 
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const DEFAULT_API_URL = 'https://trusttrace-152v.onrender.com';
+const envApiUrl = import.meta.env.VITE_API_URL;
+// Use explicit VITE_API_URL if provided, else use deployed Render backend URL
+const BASE_URL = (envApiUrl || DEFAULT_API_URL).replace(/\/+$/, '');
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    ...options,
-  });
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${BASE_URL}${cleanPath}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      ...options,
+    });
+  } catch (err: any) {
+    throw new Error(`Could not connect to backend server at ${BASE_URL}. Please ensure the backend is online and reachable.`);
+  }
+
+  // Guard against HTML responses (e.g. when frontend routes mistakenly return index.html)
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const textBody = await res.text().catch(() => '');
+    if (textBody.trim().startsWith('<') || textBody.includes('<!doctype') || textBody.includes('<html')) {
+      throw new Error(`Backend URL configuration error: received HTML instead of JSON from ${url}. Ensure VITE_API_URL points to https://trusttrace-152v.onrender.com`);
+    }
+    throw new Error(`Unexpected non-JSON response (${res.status}): ${textBody.slice(0, 120)}`);
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(err.detail || err.message || `HTTP ${res.status}`);
   }
+
   return res.json();
 }
 

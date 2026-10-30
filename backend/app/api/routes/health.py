@@ -16,11 +16,13 @@ def health_check(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
         db_status = "ok"
+        overall_status = "ok"
     except Exception as e:
         db_status = f"error: {type(e).__name__}"
+        overall_status = "error"
 
     return HealthResponse(
-        status="ok",
+        status=overall_status,
         version=settings.APP_VERSION,
         database=db_status,
         gemini_available=settings.gemini_available,
