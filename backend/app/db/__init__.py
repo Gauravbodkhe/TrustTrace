@@ -10,8 +10,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Normalize sqlite URL
+# Normalize sqlite URL or postgres URL
 db_url = settings.DATABASE_URL.replace("sqlite+aiosqlite://", "sqlite://")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
     db_url,
