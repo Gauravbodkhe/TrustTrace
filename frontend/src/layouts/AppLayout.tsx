@@ -94,12 +94,12 @@ export const AppLayout: React.FC = () => {
 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/experiments/new', label: 'New Experiment', icon: PlusCircle },
-    { to: '/experiments', label: 'Experiments', icon: Layers },
-    { to: '/comparison', label: 'Policy Comparison', icon: GitCompare },
-    { to: '/traces', label: 'Trace Explorer', icon: Activity },
-    { to: '/evidence', label: 'Evidence', icon: FileCheck2 },
-    { to: '/reports', label: 'Reports', icon: FileText },
+    { to: '/experiments/new', label: 'New Test', icon: PlusCircle },
+    { to: '/experiments', label: 'Previous Tests', icon: Layers },
+    { to: '/comparison', label: 'Compare Methods', icon: GitCompare },
+    { to: '/traces', label: 'Step-by-Step Activity', icon: Activity },
+    { to: '/evidence', label: 'Proof and Results', icon: FileCheck2 },
+    { to: '/reports', label: 'Full Reports', icon: FileText },
     { to: '/settings', label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -115,7 +115,7 @@ export const AppLayout: React.FC = () => {
         <NavLink
           to="/"
           className={`flex items-center group transition-all min-w-0 ${isFolded ? 'justify-center' : 'space-x-3'}`}
-          title={isFolded ? 'TrustTrace v0.1 • AI Reliability Benchmark' : undefined}
+          title={isFolded ? 'TrustTrace v0.1 • Test how AI handles errors' : undefined}
         >
           <div className="h-9 w-9 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 border border-indigo-600/20 dark:border-indigo-500/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold group-hover:scale-105 transition-transform shadow-xs flex-shrink-0">
             <Layers className="h-5 w-5" />
@@ -132,7 +132,7 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-mono tracking-tight truncate">
-                AI Reliability Benchmark
+                Test how AI handles errors
               </p>
             </div>
           )}
@@ -245,7 +245,7 @@ export const AppLayout: React.FC = () => {
                 }`}
               />
               <div className="absolute left-full ml-3 px-2.5 py-1 rounded-md bg-slate-900 text-white dark:bg-slate-800 text-[11px] font-sans font-medium shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap border border-slate-700/60">
-                {isHealthy === true ? 'Engine Online' : 'Engine Offline'} • Click to ping
+                {isHealthy === true ? 'System Online' : 'System Offline'} • Click to ping
               </div>
             </button>
 
@@ -278,9 +278,9 @@ export const AppLayout: React.FC = () => {
                 />
                 <span>
                   {isHealthy === true
-                    ? 'Engine Online'
+                    ? 'System Online'
                     : isHealthy === false
-                    ? 'Engine Offline'
+                    ? 'System Offline'
                     : 'Connecting...'}
                 </span>
               </span>
@@ -299,13 +299,13 @@ export const AppLayout: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span>Database:</span>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
-                  {health?.database === 'ok' ? 'SQLite (WAL)' : 'Connecting...'}
+                  {health?.database === 'ok' ? 'Connected (Fast)' : 'Connecting...'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Agent:</span>
+                <span>Mode:</span>
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                  {health?.mock_mode ? 'Deterministic Mock' : 'Gemini Hybrid'}
+                  {health?.mock_mode ? 'Fast Simulation (Free)' : 'Real Gemini AI'}
                 </span>
               </div>
             </div>
@@ -402,7 +402,7 @@ export const AppLayout: React.FC = () => {
               className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-xs shadow-indigo-600/30 flex items-center space-x-1.5"
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">New Experiment</span>
+              <span className="hidden sm:inline">New Test</span>
               <span className="sm:hidden">New</span>
             </NavLink>
           </div>

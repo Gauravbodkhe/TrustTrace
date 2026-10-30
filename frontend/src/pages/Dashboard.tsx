@@ -169,19 +169,19 @@ export const Dashboard: React.FC = () => {
             <span>TrustTrace Dashboard</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-            Empirical benchmark platform for evaluating tool-failure recovery in AI agents.
+            See how well AI agents complete tasks and recover when tools break.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Prominent Generate Overall Report Button */}
+          {/* Prominent Create Full Report Button */}
           <NavLink
             to="/reports"
             className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold text-indigo-700 dark:text-indigo-300 transition-colors shadow-2xs"
-            title="Generate reproducible research report and vector PDF"
+            title="Create reproducible research report and vector PDF"
           >
             <FileText className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>Generate Overall Report</span>
+            <span>Create Full Report</span>
           </NavLink>
 
           {/* Voice Assistant Trigger */}
@@ -198,10 +198,10 @@ export const Dashboard: React.FC = () => {
             onClick={handleQuickBenchmark}
             disabled={seeding}
             className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs disabled:opacity-50"
-            title="Automatically run a benchmark test with simulated failure to quickly view metrics"
+            title="Automatically run a test with simulated failure to quickly view metrics"
           >
             <Play className={`h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 ${seeding ? 'animate-spin' : ''}`} />
-            <span>{seeding ? 'Running...' : 'Quick Benchmark'}</span>
+            <span>{seeding ? 'Running...' : 'Run Quick Test'}</span>
           </button>
 
           <NavLink
@@ -209,7 +209,7 @@ export const Dashboard: React.FC = () => {
             className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span>View Experiments</span>
+            <span>View Previous Tests</span>
           </NavLink>
 
           <NavLink
@@ -217,7 +217,7 @@ export const Dashboard: React.FC = () => {
             className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs shadow-indigo-600/30"
           >
             <PlusCircle className="h-3.5 w-3.5" />
-            <span>New Experiment</span>
+            <span>New Test</span>
           </NavLink>
         </div>
       </div>
@@ -232,15 +232,15 @@ export const Dashboard: React.FC = () => {
       {/* Exactly 4 Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          label="Total Experiments"
+          label="Total Tests"
           value={stats?.total_experiments ?? 0}
           icon={Layers}
           accentColor="slate"
-          subtext="Total number of experiments created"
+          subtext="Total number of tests created and run"
         />
 
         <MetricCard
-          label="Task Success Rate"
+          label="Tasks Completed Successfully"
           value={
             stats?.task_success_rate !== null && stats?.task_success_rate !== undefined
               ? `${(stats.task_success_rate * 100).toFixed(1)}%`
@@ -248,11 +248,11 @@ export const Dashboard: React.FC = () => {
           }
           icon={CheckCircle2}
           accentColor="emerald"
-          subtext="Percentage of tasks that finished without unhandled errors"
+          subtext="Percentage of tasks finished without stopping"
         />
 
         <MetricCard
-          label="Recovery Success Rate"
+          label="Errors Fixed Successfully"
           value={
             stats?.recovery_success_rate !== null && stats?.recovery_success_rate !== undefined
               ? `${(stats.recovery_success_rate * 100).toFixed(1)}%`
@@ -260,15 +260,15 @@ export const Dashboard: React.FC = () => {
           }
           icon={RotateCcw}
           accentColor="amber"
-          subtext="Percentage of failures that were recovered"
+          subtext="Percentage of errors the AI was able to fix"
         />
 
         <MetricCard
-          label="Total Runs"
+          label="Total Steps Run"
           value={stats?.total_runs ?? 0}
           icon={Activity}
           accentColor="indigo"
-          subtext="Total individual task runs executed across all experiments"
+          subtext="Total individual task steps run across all tests"
         />
       </div>
 
@@ -284,17 +284,17 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Best-Performing Policy
+                    Best Error-Handling Method
                   </h2>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Stated metric ranking based on empirical test results
+                    Ranked by highest score in real tests
                   </p>
                 </div>
               </div>
 
               {bestPolicy && (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  Top Ranked
+                  Highest Score
                 </span>
               )}
             </div>
@@ -313,7 +313,7 @@ export const Dashboard: React.FC = () => {
                 <div className="grid grid-cols-3 gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
                   <div>
                     <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-slate-500 block">
-                      Task Success
+                      Tasks Completed
                     </span>
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                       {bestPolicy.task_success_rate !== null ? `${(bestPolicy.task_success_rate * 100).toFixed(1)}%` : 'N/A'}
@@ -321,7 +321,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-slate-500 block">
-                      Recovery Rate
+                      Errors Fixed
                     </span>
                     <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                       {bestPolicy.recovery_success_rate !== null ? `${(bestPolicy.recovery_success_rate * 100).toFixed(1)}%` : 'N/A'}
@@ -329,7 +329,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-slate-500 block">
-                      Evaluated Runs
+                      Tests Run
                     </span>
                     <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
                       {bestPolicy.sample_size} runs
@@ -340,17 +340,17 @@ export const Dashboard: React.FC = () => {
                 {/* Stated Metric Criteria Explanation */}
                 <div className="text-[11px] text-slate-600 dark:text-slate-400 bg-indigo-50/50 dark:bg-indigo-950/20 p-2.5 rounded-lg border border-indigo-100 dark:border-indigo-900/40 space-y-1">
                   <span className="font-semibold text-indigo-700 dark:text-indigo-300 block">
-                    Ranking Criteria:
+                    How this was chosen:
                   </span>
                   <p>
                     {bestPolicy.metric_description ||
-                      'Ranked by highest composite task success rate and fault recovery rate across completed experimental runs.'}
+                      'Highest score for completing tasks and fixing errors across real test runs.'}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="py-6 text-center text-slate-500 text-xs">
-                No policy runs have completed yet. Run experiments to evaluate recovery policies.
+                No tests have completed yet. Run tests to see how methods compare.
               </div>
             )}
           </div>
@@ -360,7 +360,7 @@ export const Dashboard: React.FC = () => {
               to="/comparison"
               className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center space-x-1"
             >
-              <span>Compare all 7 recovery policies</span>
+              <span>Compare all 7 error-handling methods</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </NavLink>
           </div>
@@ -379,13 +379,13 @@ export const Dashboard: React.FC = () => {
                   <Sparkles className="h-3 w-3 text-amber-500" />
                 </h2>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Hands-free experiment controls
+                  Control tests with your voice
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-              Use natural voice commands to control tests, filter runs, generate vector reports, and hear speech syntheses of failure diagnoses.
+              Talk to TrustTrace to run tests, search results, create full reports, or hear why an error happened.
             </p>
 
             <div className="space-y-1.5">
@@ -394,13 +394,13 @@ export const Dashboard: React.FC = () => {
               </span>
               <div className="flex flex-wrap gap-1.5">
                 <span className="text-[11px] px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  "Compare all recovery policies"
+                  "Compare all methods"
                 </span>
                 <span className="text-[11px] px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  "Generate overall report"
+                  "Create full report"
                 </span>
                 <span className="text-[11px] px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                  "Explain why this run failed"
+                  "Why did this test fail?"
                 </span>
               </div>
             </div>
@@ -412,7 +412,7 @@ export const Dashboard: React.FC = () => {
               className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center space-x-2 transition-colors shadow-xs shadow-indigo-600/30"
             >
               <Mic className="h-3.5 w-3.5" />
-              <span>Launch Voice Assistant</span>
+              <span>Open Voice Assistant</span>
             </button>
           </div>
         </div>
@@ -422,13 +422,13 @@ export const Dashboard: React.FC = () => {
       <div className="space-y-6">
         {/* Policy Comparison & Most Common Failures Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Section 1: Recovery Policy Comparison (2 cols) */}
+          {/* Section 1: Error-Handling Methods Comparison (2 cols) */}
           <div className="lg:col-span-2 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0f1728] shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800/60">
               <div>
                 <div className="flex items-center space-x-2">
                   <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                    Recovery Policy Comparison
+                    Compare Error-Handling Methods
                   </h2>
                   {bestPolicy && (
                     <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
@@ -438,7 +438,7 @@ export const Dashboard: React.FC = () => {
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Compare overall task success rate and recovery capability across all 7 evaluated recovery strategies.
+                  See how all 7 methods compare at completing tasks and fixing errors.
                 </p>
               </div>
 
@@ -446,7 +446,7 @@ export const Dashboard: React.FC = () => {
                 to="/comparison"
                 className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 flex items-center space-x-1 self-start sm:self-auto"
               >
-                <span>Full Matrix</span>
+                <span>View All Methods</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </NavLink>
             </div>
@@ -490,31 +490,31 @@ export const Dashboard: React.FC = () => {
                     <Legend
                       wrapperStyle={{ fontSize: '11px', paddingTop: '10px', color: chartTheme.legendText }}
                     />
-                    <Bar dataKey="successRate" name="Task Success Rate %" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="recoveryRate" name="Recovery Success Rate %" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="successRate" name="Tasks Completed (%)" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="recoveryRate" name="Errors Fixed (%)" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    No policy benchmark data recorded yet
+                    No test results recorded yet
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-                    Run experiments or trigger the quick benchmark to see how different recovery policies perform when tools fail.
+                    Run tests or start a quick test to see how different error-handling methods perform.
                   </p>
                   <button
                     onClick={handleQuickBenchmark}
                     disabled={seeding}
                     className="mt-3 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
                   >
-                    {seeding ? 'Running Benchmark...' : 'Run Quick Benchmark Now'}
+                    {seeding ? 'Running Test...' : 'Run Quick Test Now'}
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Section 2: Most Common Failures Card (1 col) */}
+          {/* Section 2: Common Test Problems Card (1 col) */}
           <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0f1728] shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/60 mb-3">
@@ -524,10 +524,10 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Most Common Failures
+                      Common Test Problems
                     </h2>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Injected fault distribution & recovery
+                      Problems tested and how often the AI fixed them
                     </p>
                   </div>
                 </div>
@@ -536,7 +536,7 @@ export const Dashboard: React.FC = () => {
                   to="/evidence"
                   className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
                 >
-                  Evidence Logs
+                  Proof and Results
                 </NavLink>
               </div>
 
@@ -559,14 +559,14 @@ export const Dashboard: React.FC = () => {
                             {fail.category}
                           </span>
                           <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-                            {totalFailures} {totalFailures === 1 ? 'failure' : 'failures'}
+                            {totalFailures} {totalFailures === 1 ? 'problem' : 'problems'}
                           </span>
                         </div>
 
                         {/* Recovery mini-progress bar */}
                         <div>
                           <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1">
-                            <span>Recovery Rate</span>
+                            <span>Fixed</span>
                             <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                               {recPct !== null ? `${recPct}% (${recoveredFailures}/${totalFailures})` : '0%'}
                             </span>
@@ -584,9 +584,9 @@ export const Dashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="py-10 text-center text-slate-500 dark:text-slate-400 text-xs">
-                  <p>No tool failures recorded yet.</p>
+                  <p>No test problems recorded yet.</p>
                   <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                    Execute experiments with fault scenarios to observe tool breakdowns.
+                    Run tests with test problems to see how the AI recovers.
                   </p>
                 </div>
               )}
@@ -597,21 +597,21 @@ export const Dashboard: React.FC = () => {
                 to="/scenarios"
                 className="text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
               >
-                View Fault Scenarios &rarr;
+                View All Test Problems &rarr;
               </NavLink>
             </div>
           </div>
         </div>
 
-        {/* Section 2: Recent Experiments */}
+        {/* Section 3: Recent Tests */}
         <div className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0f1728] shadow-xs overflow-hidden">
           <div className="p-4 sm:px-5 sm:py-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                Recent Experiments
+                Recent Tests
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Latest test configurations, recovery strategies, and outcomes
+                Latest tests, methods used, and outcomes
               </p>
             </div>
 
@@ -620,7 +620,7 @@ export const Dashboard: React.FC = () => {
                 <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Filter experiments..."
+                  placeholder="Search tests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 pr-9 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-indigo-500 font-sans w-52"
@@ -629,7 +629,7 @@ export const Dashboard: React.FC = () => {
                   <VoiceMicButton
                     onTranscript={(text) => setSearchQuery(text)}
                     size="sm"
-                    title="Voice search experiments"
+                    title="Voice search tests"
                   />
                 </div>
               </div>
@@ -650,41 +650,41 @@ export const Dashboard: React.FC = () => {
                   <Layers className="h-6 w-6" />
                 </div>
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  No experiments yet.
+                  No tests yet.
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                  Run your first experiment to see how AI agents handle tool failures.
+                  Run your first test to see how the AI handles errors when tools break.
                 </p>
                 <div className="mt-4 flex items-center justify-center space-x-3">
                   <NavLink
                     to="/experiments/new"
                     className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs"
                   >
-                    Create First Experiment
+                    Create First Test
                   </NavLink>
                   <button
                     onClick={handleQuickBenchmark}
                     disabled={seeding}
                     className="px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   >
-                    {seeding ? 'Running...' : 'Run Quick Benchmark'}
+                    {seeding ? 'Running...' : 'Run Quick Test'}
                   </button>
                 </div>
               </div>
             ) : filteredExperiments.length === 0 ? (
               <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
-                No experiments matching "{searchQuery}".
+                No tests matching "{searchQuery}".
               </div>
             ) : (
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 dark:bg-[#0b101c] text-slate-500 dark:text-slate-400 font-medium uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800/80">
                   <tr>
-                    <th className="py-3 px-5">Experiment Name</th>
-                    <th className="py-3 px-4">Policy</th>
-                    <th className="py-3 px-4">Fault Scenario</th>
+                    <th className="py-3 px-5">Test Name</th>
+                    <th className="py-3 px-4">Method Used</th>
+                    <th className="py-3 px-4">Test Problem</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Created Date</th>
-                    <th className="py-3 px-5 text-right">Actions</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-5 text-right">Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -733,18 +733,16 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Methodological Transparency Callout */}
+        {/* Real, Honest Results Callout */}
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 shadow-xs flex items-start space-x-3 text-xs text-slate-600 dark:text-slate-400">
           <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
           <div className="space-y-1">
             <p className="font-semibold text-slate-900 dark:text-slate-200">
-              Methodological Transparency
+              Real, Honest Results
             </p>
             <p className="leading-relaxed">
-              All statistics in this dashboard are computed dynamically from actual execution traces
-              recorded in the database. Zero statistics are hardcoded or fabricated. In accordance with
-              scientific standards, external LLM costs are reported as null unless genuine token and pricing
-              telemetry is recorded.
+              All results on this dashboard come directly from real test logs in the database.
+              Zero numbers are made up. External costs and token counts are only displayed when actually measured.
             </p>
           </div>
         </div>

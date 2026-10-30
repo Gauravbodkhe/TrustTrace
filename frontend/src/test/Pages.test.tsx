@@ -181,8 +181,8 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getAllByText('New Experiment')[0]).toBeInTheDocument();
-      expect(screen.getByText('Step 1: Experiment Details')).toBeInTheDocument();
+      expect(screen.getAllByText('New Test')[0]).toBeInTheDocument();
+      expect(screen.getByText(/Step 1 of 6: Test Details/i)).toBeInTheDocument();
       expect(screen.getByText('Continue to Step 2')).toBeInTheDocument();
     });
   });
@@ -194,9 +194,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Policy Comparison')).toBeInTheDocument();
-      expect(screen.getByText('Policy Comparison Matrix')).toBeInTheDocument();
-      expect(screen.getByText('Run Comparison Experiment')).toBeInTheDocument();
+      expect(screen.getByText('Compare Methods')).toBeInTheDocument();
+      expect(screen.getByText('Compare All 7 Methods')).toBeInTheDocument();
+      expect(screen.getByText('Run Comparison Test')).toBeInTheDocument();
     });
   });
 
@@ -219,8 +219,8 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Evidence & Explainable Results')).toBeInTheDocument();
-      expect(screen.getByText('Sensitive Data & API Keys Redacted')).toBeInTheDocument();
+      expect(screen.getByText('Proof and Results')).toBeInTheDocument();
+      expect(screen.getByText('Passwords & Private Data Hidden')).toBeInTheDocument();
     });
   });
 
@@ -231,9 +231,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Research Reports & Vector PDF Export')).toBeInTheDocument();
-      expect(screen.getByText('Generate Complete Overall Report')).toBeInTheDocument();
-      expect(screen.getByText('Download Vector PDF')).toBeInTheDocument();
+      expect(screen.getByText('Reports & PDF Downloads')).toBeInTheDocument();
+      expect(screen.getByText('Create Full Report')).toBeInTheDocument();
+      expect(screen.getByText('Download PDF Report')).toBeInTheDocument();
     });
   });
 
@@ -244,9 +244,9 @@ describe('TrustTrace Pages Suite', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText('Platform Status & Configuration')).toBeInTheDocument();
-      expect(screen.getByText('System Readiness Checklist')).toBeInTheDocument();
-      expect(screen.getByText('Python 3.11 Runtime & AsyncIO Engine')).toBeInTheDocument();
+      expect(screen.getByText('Settings & System Status')).toBeInTheDocument();
+      expect(screen.getByText('System Status Checklist')).toBeInTheDocument();
+      expect(screen.getByText('Python Runtime & Test Engine')).toBeInTheDocument();
     });
   });
 });

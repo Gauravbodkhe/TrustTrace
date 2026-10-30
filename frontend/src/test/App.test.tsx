@@ -126,14 +126,14 @@ describe('TrustTrace Frontend Suite', () => {
   it('renders the layout with branding and navigation', async () => {
     render(<App />);
     expect(screen.getAllByText('TrustTrace')[0]).toBeInTheDocument();
-    expect(screen.getByText('AI Reliability Benchmark')).toBeInTheDocument();
+    expect(screen.getByText('Test how AI handles errors')).toBeInTheDocument();
     expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('New Experiment')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Experiments')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Policy Comparison')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Trace Explorer')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Evidence')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Reports')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('New Test')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Previous Tests')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Compare Methods')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Step-by-Step Activity')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Proof and Results')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Full Reports')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Settings')[0]).toBeInTheDocument();
   });
 
@@ -141,7 +141,7 @@ describe('TrustTrace Frontend Suite', () => {
     render(<App />);
     await waitFor(() => {
       expect(screen.getByText('TrustTrace Dashboard')).toBeInTheDocument();
-      expect(screen.getByText('Total Experiments')).toBeInTheDocument();
+      expect(screen.getByText('Total Tests')).toBeInTheDocument();
       expect(screen.getAllByText('83.3%')[0]).toBeInTheDocument();
     });
   });

@@ -148,7 +148,7 @@ export const ScenarioLibrary: React.FC = () => {
             <span>Fault Scenarios</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Explore and configure controlled failure modes used to test AI agent reliability and recovery.
+            Explore and configure test problems used to see how AI agents handle errors.
           </p>
         </div>
 
@@ -157,7 +157,7 @@ export const ScenarioLibrary: React.FC = () => {
           className="self-start sm:self-auto flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>New Fault Scenario</span>
+          <span>New Test Problem</span>
         </button>
       </div>
 
@@ -172,10 +172,8 @@ export const ScenarioLibrary: React.FC = () => {
       <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-slate-900/40 border border-amber-200/80 dark:border-slate-800 flex items-start space-x-3 text-xs text-slate-600 dark:text-slate-400 shadow-xs">
         <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
         <p>
-          <strong className="text-slate-800 dark:text-slate-200">Safety Notice:</strong> All fault
-          scenarios are simulated strictly within TrustTrace's internal mock execution pipeline. No
-          external network requests, external APIs, or production endpoints are ever compromised,
-          intercepted, or disrupted.
+          <strong className="text-slate-800 dark:text-slate-200">Safety Notice:</strong> All test
+          problems are simulated inside TrustTrace. No external servers or real APIs are affected.
         </p>
       </div>
 
@@ -185,7 +183,7 @@ export const ScenarioLibrary: React.FC = () => {
           <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Search scenarios by name, category, or ID..."
+            placeholder="Search test problems by name, category, or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -246,11 +244,11 @@ export const ScenarioLibrary: React.FC = () => {
 
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                  <span>Probability: {(s.probability * 100).toFixed(0)}%</span>
+                  <span>Chance of Failure: {(s.probability * 100).toFixed(0)}%</span>
                   <span>
                     {s.deterministic_step !== null
-                      ? `Step ${s.deterministic_step}`
-                      : 'Probabilistic'}
+                      ? `Happens on Step ${s.deterministic_step}`
+                      : 'Random Step'}
                   </span>
                 </div>
 
@@ -273,11 +271,11 @@ export const ScenarioLibrary: React.FC = () => {
       ) : (
         <EmptyState
           icon={ShieldAlert}
-          title="No matching scenarios found"
+          title="No matching test problems found"
           description={
             searchQuery || selectedSeverity !== 'all' || selectedCategory !== 'all'
               ? 'Try adjusting your search criteria or filters.'
-              : 'The scenario library is empty.'
+              : 'The test problem catalog is empty.'
           }
           actionLabel="Clear Filters"
           onAction={() => {
@@ -294,7 +292,7 @@ export const ScenarioLibrary: React.FC = () => {
           <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white font-sans">
-                {editingScenario ? 'Configure Fault Scenario' : 'Create Custom Fault Scenario'}
+                {editingScenario ? 'Configure Test Problem' : 'Create Custom Test Problem'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -307,7 +305,7 @@ export const ScenarioLibrary: React.FC = () => {
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
-                  Scenario Name
+                  Problem Name
                 </label>
                 <input
                   type="text"
@@ -320,7 +318,7 @@ export const ScenarioLibrary: React.FC = () => {
 
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1">
-                  Description / Trigger Conditions
+                  Description / What Happens
                 </label>
                 <textarea
                   value={formDesc}
@@ -369,7 +367,7 @@ export const ScenarioLibrary: React.FC = () => {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1 font-mono">
-                    Probability (0-1)
+                    Chance of Failure (0-1)
                   </label>
                   <input
                     type="number"
@@ -423,7 +421,7 @@ export const ScenarioLibrary: React.FC = () => {
                   type="submit"
                   className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-xs transition-colors"
                 >
-                  Save Scenario
+                  Save Problem
                 </button>
               </div>
             </form>

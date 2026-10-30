@@ -65,10 +65,10 @@ export const ExperimentsList: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2.5">
             <Layers className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            <span>Experiments</span>
+            <span>Previous Tests</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            View, search, and inspect results from all previous reliability evaluation experiments.
+            View, search, and check results from all previous tests.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export const ExperimentsList: React.FC = () => {
           className="self-start sm:self-auto flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs"
         >
           <PlusCircle className="h-3.5 w-3.5" />
-          <span>New Experiment</span>
+          <span>New Test</span>
         </Link>
       </div>
 
@@ -94,7 +94,7 @@ export const ExperimentsList: React.FC = () => {
           <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Search experiments by name, policy, or scenario..."
+            placeholder="Search tests by name, method, or problem..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -133,10 +133,10 @@ export const ExperimentsList: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-[#0b101d] text-slate-500 dark:text-slate-400 uppercase text-[10px] font-mono tracking-wider border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="py-3 px-5">Experiment Name</th>
-                  <th className="py-3 px-4">Recovery Policy</th>
-                  <th className="py-3 px-4">Fault Scenario</th>
-                  <th className="py-3 px-4">Trials</th>
+                  <th className="py-3 px-5">Test Name</th>
+                  <th className="py-3 px-4">Method Used</th>
+                  <th className="py-3 px-4">Test Problem</th>
+                  <th className="py-3 px-4">Runs</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Created Date</th>
                   <th className="py-3 px-4 text-right">Action</th>
@@ -182,7 +182,7 @@ export const ExperimentsList: React.FC = () => {
                         onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center space-x-1 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
                       >
-                        <span>View Results</span>
+                        <span>View Details</span>
                         <ArrowRight className="h-3 w-3" />
                       </Link>
                     </td>
@@ -195,13 +195,13 @@ export const ExperimentsList: React.FC = () => {
       ) : (
         <EmptyState
           icon={FlaskConical}
-          title="No experiments found"
+          title="No tests found"
           description={
             searchQuery || statusFilter !== 'all'
               ? 'Try adjusting your search query or filter options.'
-              : 'You have not run any reliability experiments yet. Click below to start your first experiment.'
+              : 'You have not run any tests yet. Click below to start your first test.'
           }
-          actionLabel="Run First Experiment"
+          actionLabel="Run First Test"
           onAction={() => navigate('/experiments/new')}
         />
       )}

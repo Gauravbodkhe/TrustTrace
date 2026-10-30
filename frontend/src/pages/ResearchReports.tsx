@@ -122,10 +122,10 @@ export const ResearchReports: React.FC = () => {
             <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
               <FileText className="h-5 w-5" />
             </div>
-            <span>Research Reports & Vector PDF Export</span>
+            <span>Reports & PDF Downloads</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-            Download and print comprehensive, reproducible experimental reports covering recovery policies, injected fault breakdowns, and empirical evidence.
+            Download and print clear reports on how AI handles tool problems and fixes errors.
           </p>
         </div>
 
@@ -156,11 +156,11 @@ export const ResearchReports: React.FC = () => {
                 Official Benchmark
               </span>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Generate Complete Overall Report
+                Create Full Report
               </h2>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-              Synthesizes all executed experiments, compares Recovery Policies A through G, analyzes injected tool faults, and produces an exportable vector PDF with formal academic formatting.
+              Combines results from all tests, compares Methods A through G, analyzes test problems, and creates an easy-to-read PDF report.
             </p>
           </div>
 
@@ -171,7 +171,7 @@ export const ResearchReports: React.FC = () => {
               className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs shadow-indigo-600/30 transition-colors"
             >
               <Download className="h-4 w-4" />
-              <span>Download Vector PDF</span>
+              <span>Download PDF Report</span>
             </a>
 
             <a
@@ -197,7 +197,7 @@ export const ResearchReports: React.FC = () => {
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            Combined Overall Report (All Experiments)
+            Combined Full Report (All Tests)
           </button>
           <button
             onClick={() => setReportScope('single')}
@@ -207,7 +207,7 @@ export const ResearchReports: React.FC = () => {
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            Single Experiment Focus
+            Single Test Focus
           </button>
         </div>
 
@@ -231,41 +231,41 @@ export const ResearchReports: React.FC = () => {
           <div className="p-3.5 rounded-xl bg-white dark:bg-[#0f1728] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center gap-3 print:hidden">
             <div className="flex items-center space-x-1.5 text-xs text-slate-500 font-medium">
               <Filter className="h-3.5 w-3.5" />
-              <span>Scope Filters:</span>
+              <span>Filters:</span>
             </div>
 
             <div className="flex items-center space-x-1.5">
-              <span className="text-[11px] font-mono text-slate-400">Policy:</span>
+              <span className="text-[11px] font-mono text-slate-400">Method:</span>
               <select
                 value={policyFilter}
                 onChange={(e) => setPolicyFilter(e.target.value)}
                 className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-sans"
               >
-                <option value="all">All Policies (A–G)</option>
-                <option value="policy_a_no_recovery">Policy A: No Recovery</option>
-                <option value="policy_b_simple_retry">Policy B: Simple Retry</option>
-                <option value="policy_c_validation_retry">Policy C: Validation Retry</option>
-                <option value="policy_d_alternative_tool">Policy D: Alternative Tool</option>
-                <option value="policy_e_context_trimming">Policy E: Context Trimming</option>
-                <option value="policy_f_safe_fallback">Policy F: Safe Fallback</option>
-                <option value="policy_g_budget_aware">Policy G: Budget-Aware Adaptive</option>
+                <option value="all">All Methods (A–G)</option>
+                <option value="policy_a_no_recovery">Method A: Stop on Error</option>
+                <option value="policy_b_simple_retry">Method B: Simple Retry</option>
+                <option value="policy_c_validation_retry">Method C: Wait & Retry</option>
+                <option value="policy_d_alternative_tool">Method D: Use Backup Tool</option>
+                <option value="policy_e_context_trimming">Method E: Fix Arguments</option>
+                <option value="policy_f_safe_fallback">Method F: Ask Person for Help</option>
+                <option value="policy_g_budget_aware">Method G: Smart Adaptive</option>
               </select>
             </div>
 
             <div className="flex items-center space-x-1.5">
-              <span className="text-[11px] font-mono text-slate-400">Scenario:</span>
+              <span className="text-[11px] font-mono text-slate-400">Test Problem:</span>
               <select
                 value={scenarioFilter}
                 onChange={(e) => setScenarioFilter(e.target.value)}
                 className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 focus:outline-none font-sans"
               >
-                <option value="all">All Fault Scenarios</option>
-                <option value="transient_error_step1">Transient HTTP 503</option>
-                <option value="rate_limit_step1">Rate Limit Exceeded (429)</option>
-                <option value="schema_mismatch_step1">Schema Mismatch</option>
-                <option value="tool_offline_step1">Tool Unavailable (500)</option>
-                <option value="network_timeout_step1">Network Timeout</option>
-                <option value="budget_exhaustion_step1">Token Exhaustion</option>
+                <option value="all">All Test Problems</option>
+                <option value="transient_error_step1">Temporary Server Error (503)</option>
+                <option value="rate_limit_step1">Too Many Requests (429)</option>
+                <option value="schema_mismatch_step1">Wrong Answer Format</option>
+                <option value="tool_offline_step1">Tool Offline / Broken (500)</option>
+                <option value="network_timeout_step1">Slow Connection Timeout</option>
+                <option value="budget_exhaustion_step1">Token Limit Reached</option>
               </select>
             </div>
           </div>
@@ -282,7 +282,7 @@ export const ResearchReports: React.FC = () => {
               <div className="border-b border-slate-200 dark:border-slate-800/80 pb-6 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono uppercase text-indigo-600 dark:text-indigo-400 tracking-wider font-bold">
-                    TrustTrace Formal Research Benchmark Report
+                    TrustTrace Research Benchmark Report
                   </span>
                   <span className="text-[11px] font-mono text-slate-400">
                     {new Date().toLocaleDateString('en-US', {
@@ -304,12 +304,12 @@ export const ResearchReports: React.FC = () => {
                     Scope: {overallData.scope}
                   </span>
                   <span>•</span>
-                  <span>Experiments: {overallData.total_experiments}</span>
+                  <span>Tests Run: {overallData.total_experiments}</span>
                   <span>•</span>
-                  <span>Evaluated Runs: {overallData.total_runs}</span>
+                  <span>Tasks Run: {overallData.total_runs}</span>
                   <span>•</span>
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    Overall Success Rate: {(overallData.overall_success_rate * 100).toFixed(1)}%
+                    Tasks Completed: {(overallData.overall_success_rate * 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -317,13 +317,11 @@ export const ResearchReports: React.FC = () => {
               {/* Section 1: Executive Summary */}
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide font-mono flex items-center space-x-2">
-                  <span>1. Executive Summary & Top Findings</span>
+                  <span>1. Summary & Main Findings</span>
                 </h3>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5">
                   <p className="leading-relaxed">
-                    This evaluation examines agent resilience across controlled tool-failure injections.
-                    The empirical data demonstrates that unguided retries (Policy B) fail completely on permanent errors
-                    (e.g., schema mismatches and tool outages), wasting latency and token budget without resolution.
+                    This report shows how well AI agents recover when tools break. Simple retries fail when problems are permanent (like wrong answer formats or broken tools), which wastes time without fixing the issue.
                   </p>
                   <p className="leading-relaxed font-medium text-slate-800 dark:text-slate-200">
                     {overallData.best_policy_summary}
@@ -335,13 +333,13 @@ export const ResearchReports: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide font-mono">
-                    2. Recovery Policy Comparison Matrix (Policies A–G)
+                    2. Compare All 7 Methods (Methods A through G)
                   </h3>
                   <NavLink
                     to="/comparison"
                     className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 print:hidden"
                   >
-                    <span>Full Comparison View</span>
+                    <span>Compare Methods</span>
                     <ChevronRight className="h-3 w-3" />
                   </NavLink>
                 </div>
@@ -350,11 +348,11 @@ export const ResearchReports: React.FC = () => {
                   <table className="w-full text-left font-mono text-[11px]">
                     <thead className="bg-slate-50 dark:bg-[#0c121e] text-slate-500 dark:text-slate-400 uppercase text-[10px] border-b border-slate-200 dark:border-slate-800">
                       <tr>
-                        <th className="py-2.5 px-3">Policy ID & Name</th>
+                        <th className="py-2.5 px-3">Method Name</th>
                         <th className="py-2.5 px-3 text-right">Runs (N)</th>
-                        <th className="py-2.5 px-3 text-right">Task Success</th>
-                        <th className="py-2.5 px-3 text-right">Recovery Rate</th>
-                        <th className="py-2.5 px-3 text-right">Mean Latency</th>
+                        <th className="py-2.5 px-3 text-right">Tasks Completed</th>
+                        <th className="py-2.5 px-3 text-right">Errors Fixed</th>
+                        <th className="py-2.5 px-3 text-right">Time Taken</th>
                         <th className="py-2.5 px-3 text-right">Avg Retries</th>
                       </tr>
                     </thead>
@@ -399,17 +397,17 @@ export const ResearchReports: React.FC = () => {
               {/* Section 3: Injected Failure Distribution */}
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide font-mono">
-                  3. Injected Fault Distribution & Recovery Resilience
+                  3. Problems Tested & Recovery Scores
                 </h3>
                 <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                   <table className="w-full text-left font-mono text-[11px]">
                     <thead className="bg-slate-50 dark:bg-[#0c121e] text-slate-500 dark:text-slate-400 uppercase text-[10px] border-b border-slate-200 dark:border-slate-800">
                       <tr>
-                        <th className="py-2.5 px-3">Fault Category</th>
+                        <th className="py-2.5 px-3">Test Problem</th>
                         <th className="py-2.5 px-3 font-sans">Description</th>
-                        <th className="py-2.5 px-3 text-right">Injected Total</th>
-                        <th className="py-2.5 px-3 text-right">Recovered</th>
-                        <th className="py-2.5 px-3 text-right">Resilience Rate</th>
+                        <th className="py-2.5 px-3 text-right">Times Tested</th>
+                        <th className="py-2.5 px-3 text-right">Times Fixed</th>
+                        <th className="py-2.5 px-3 text-right">Recovery Score</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -440,14 +438,14 @@ export const ResearchReports: React.FC = () => {
               {/* Section 4: Threats to Validity and Methodology */}
               <div className="space-y-2">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide font-mono">
-                  4. Threats to Validity & Scientific Honesty
+                  4. Honest Testing Notes
                 </h3>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 text-slate-600 dark:text-slate-400 text-xs">
                   <p>
-                    <strong>Controlled Deterministic Mocks:</strong> Baseline experiments utilize deterministic mock agents and predictable fault injection scenarios to ensure complete reproducibility across randomized seeds.
+                    <strong>Controlled Testing:</strong> Baseline experiments use predictable simulations to ensure tests give the same honest results every time.
                   </p>
                   <p>
-                    <strong>Cost Telemetry Accounting:</strong> To maintain strict academic integrity, external LLM dollar costs are recorded as null when running against deterministic mocks rather than fabricating synthetic dollar figures.
+                    <strong>No Fake Costs:</strong> When running free simulated tests, external AI dollar costs are marked as null rather than showing fake estimates.
                   </p>
                 </div>
               </div>
@@ -456,18 +454,18 @@ export const ResearchReports: React.FC = () => {
               {overallData.recent_traces.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide font-mono">
-                    5. Appendix: Sample Execution Traces & Action Decoupling
+                    5. Example Step-by-Step History
                   </h3>
                   <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="w-full text-left font-mono text-[10px]">
                       <thead className="bg-slate-50 dark:bg-[#0c121e] text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
                         <tr>
                           <th className="py-2 px-3">Step</th>
-                          <th className="py-2 px-3">Tool</th>
+                          <th className="py-2 px-3">Tool Used</th>
                           <th className="py-2 px-3">Status</th>
-                          <th className="py-2 px-3">Fault</th>
-                          <th className="py-2 px-3">Recovery Action</th>
-                          <th className="py-2 px-3 text-right">Latency</th>
+                          <th className="py-2 px-3">Problem</th>
+                          <th className="py-2 px-3">Fix Attempted</th>
+                          <th className="py-2 px-3 text-right">Time Taken</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
@@ -512,7 +510,7 @@ export const ResearchReports: React.FC = () => {
                     className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors"
                   >
                     <Download className="h-3.5 w-3.5" />
-                    <span>Download Vector PDF</span>
+                    <span>Download PDF Report</span>
                   </a>
 
                   <button
@@ -527,9 +525,9 @@ export const ResearchReports: React.FC = () => {
             </div>
           ) : (
             <EmptyState
-              title="No experimental data recorded yet"
-              description="Execute benchmark experiments to generate an overall research report with vector PDF export."
-              actionLabel="Create Experiment"
+              title="No test data recorded yet"
+              description="Run tests to generate a full report with PDF download."
+              actionLabel="New Test"
               onAction={() => navigate('/experiments/new')}
             />
           )}
@@ -543,7 +541,7 @@ export const ResearchReports: React.FC = () => {
           <div className="p-4 rounded-xl bg-white dark:bg-[#0f172a]/60 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
             <div className="flex-1 max-w-md">
               <label className="block text-xs font-mono text-slate-500 dark:text-slate-400 mb-1.5">
-                Select Target Experiment
+                Choose a Test
               </label>
               <select
                 value={selectedExpId}
@@ -566,7 +564,7 @@ export const ResearchReports: React.FC = () => {
                   className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors"
                 >
                   <Download className="h-3.5 w-3.5" />
-                  <span>Download PDF</span>
+                  <span>Download PDF Report</span>
                 </a>
                 <a
                   href={api.exports.csvUrl(selectedExpId)}
@@ -600,13 +598,13 @@ export const ResearchReports: React.FC = () => {
           {loadingSingle ? (
             <div className="py-16 text-center text-slate-400 dark:text-slate-500 text-xs">
               <RefreshCw className="h-6 w-6 animate-spin mx-auto text-indigo-500 mb-2" />
-              <span>Loading experiment telemetry...</span>
+              <span>Loading test report data...</span>
             </div>
           ) : experiment ? (
             <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#0b101d] border border-slate-200 dark:border-slate-800/80 space-y-6 text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-sans shadow-sm print:shadow-none print:border-none print:p-0">
               <div className="border-b border-slate-200 dark:border-slate-800/80 pb-5 space-y-1.5">
                 <div className="text-[10px] font-mono uppercase text-indigo-600 dark:text-indigo-400 tracking-wider font-semibold">
-                  TrustTrace Experimental Benchmark Report
+                  TrustTrace Test Report
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
                   {experiment.name}
@@ -616,24 +614,24 @@ export const ResearchReports: React.FC = () => {
                   <span>•</span>
                   <span>Status: {experiment.status}</span>
                   <span>•</span>
-                  <span>Agent: {experiment.agent_type}</span>
+                  <span>AI Runner: {experiment.agent_type === 'mock' ? 'Fast Simulation' : 'Gemini AI'}</span>
                 </div>
               </div>
 
               {/* Configuration */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wide font-mono">
-                  1. Experimental Configuration & Variables
+                  1. Test Details & Settings
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-[#090d16] p-4 rounded-xl border border-slate-200 dark:border-slate-800/60 font-mono text-[11px]">
                   <div>
-                    <span className="text-slate-500 block">Policy:</span>
+                    <span className="text-slate-500 block">Method:</span>
                     <strong className="text-indigo-600 dark:text-indigo-400">
                       {experiment.policy_id}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">Scenario:</span>
+                    <span className="text-slate-500 block">Test Problem:</span>
                     <strong className="text-rose-600 dark:text-rose-400">
                       {experiment.scenario_id}
                     </strong>
@@ -643,7 +641,7 @@ export const ResearchReports: React.FC = () => {
                     <strong className="text-slate-900 dark:text-slate-200">{experiment.seed}</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">Trials / Repetitions:</span>
+                    <span className="text-slate-500 block">Number of Runs:</span>
                     <strong className="text-slate-900 dark:text-slate-200">
                       {experiment.repetitions}
                     </strong>
@@ -654,23 +652,23 @@ export const ResearchReports: React.FC = () => {
               {/* Measured Metrics */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wide font-mono">
-                  2. Measured Evaluation Metrics
+                  2. Test Results & Scores
                 </h3>
                 <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                   <table className="w-full text-left font-mono text-[11px]">
                     <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 uppercase text-[10px] border-b border-slate-200 dark:border-slate-800">
                       <tr>
-                        <th className="py-2.5 px-4">Metric</th>
-                        <th className="py-2.5 px-4">Observed Value</th>
+                        <th className="py-2.5 px-4">Score / Metric</th>
+                        <th className="py-2.5 px-4">Result</th>
                         <th className="py-2.5 px-4 font-sans font-normal">
-                          Definition & Operational Formula
+                          What This Means
                         </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                       <tr>
                         <td className="py-2.5 px-4 text-emerald-600 dark:text-emerald-400 font-semibold">
-                          Task Success Rate
+                          Tasks Completed Successfully
                         </td>
                         <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
                           {primaryMetric?.task_success_rate !== null &&
@@ -679,12 +677,12 @@ export const ResearchReports: React.FC = () => {
                             : 'N/A'}
                         </td>
                         <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-sans text-xs">
-                          Fraction of total completed trials that yielded outcome == 'success'.
+                          Percentage of test runs that completed the task successfully.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-indigo-600 dark:text-indigo-400 font-semibold">
-                          Recovery Success Rate
+                          Errors Fixed Successfully
                         </td>
                         <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
                           {primaryMetric?.recovery_success_rate !== null &&
@@ -693,12 +691,12 @@ export const ResearchReports: React.FC = () => {
                             : 'N/A'}
                         </td>
                         <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-sans text-xs">
-                          Fault-injected trials that successfully reached completion via policy recovery.
+                          Percentage of test problems that the AI fixed successfully.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-semibold">
-                          Mean Latency
+                          Time Taken
                         </td>
                         <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
                           {primaryMetric?.mean_latency_ms !== null &&
@@ -707,7 +705,7 @@ export const ResearchReports: React.FC = () => {
                             : 'N/A'}
                         </td>
                         <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-sans text-xs">
-                          Arithmetic mean of wall-clock duration across completed runs.
+                          Average time taken to run each task from start to finish.
                         </td>
                       </tr>
                       <tr>
@@ -721,7 +719,7 @@ export const ResearchReports: React.FC = () => {
                             : '0.0'}
                         </td>
                         <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400 font-sans text-xs">
-                          Total tool retry calls consumed across all tasks.
+                          Average number of times the AI retried after a problem occurred.
                         </td>
                       </tr>
                     </tbody>
@@ -734,23 +732,23 @@ export const ResearchReports: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                   <span className="text-xs text-slate-700 dark:text-slate-300">
-                    Want to inspect step-by-step audit logs, sanitized payloads, and root cause diagnosis?
+                    Want to inspect step-by-step activity, safe data, and problem diagnosis?
                   </span>
                 </div>
                 <NavLink
                   to="/evidence"
                   className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1"
                 >
-                  <span>Open Evidence Audit</span>
+                  <span>Open Proof and Results</span>
                   <ExternalLink className="h-3 w-3" />
                 </NavLink>
               </div>
             </div>
           ) : (
             <EmptyState
-              title="No experiments found"
-              description="Create and execute an experiment first to view single-experiment reports."
-              actionLabel="New Experiment"
+              title="No tests found"
+              description="Run a test first to view single-test reports."
+              actionLabel="New Test"
               onAction={() => navigate('/experiments/new')}
             />
           )}

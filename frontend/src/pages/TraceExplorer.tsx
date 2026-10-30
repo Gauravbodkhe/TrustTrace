@@ -168,10 +168,10 @@ export const TraceExplorer: React.FC = () => {
           <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400">
             <Activity className="h-5 w-5" />
           </div>
-          <span>Trace Explorer</span>
+          <span>Step-by-Step Activity</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Follow the agent's exact step-by-step decisions, tool executions, and failure recovery in plain language.
+          Follow the AI agent's exact tool calls, test problems, and error fixes in simple language.
         </p>
       </div>
 
@@ -186,7 +186,7 @@ export const TraceExplorer: React.FC = () => {
       <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0f1728] shadow-xs grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
         <div>
           <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">
-            1. Select Experiment
+            1. Choose a Test
           </label>
           <select
             value={selectedExperimentId}
@@ -205,7 +205,7 @@ export const TraceExplorer: React.FC = () => {
 
         <div>
           <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">
-            2. Select Task Execution Run
+            2. Choose a Task Run
           </label>
           <select
             value={selectedRunId}
@@ -231,15 +231,15 @@ export const TraceExplorer: React.FC = () => {
               Task: <strong className="text-slate-900 dark:text-slate-100">{currentTask?.name || currentRun.task_id}</strong>
             </span>
             <span className="text-slate-500 dark:text-slate-400">
-              Strategy: <strong className="text-indigo-600 dark:text-indigo-400">{currentRun.policy_id.replace('policy_', '')}</strong>
+              Method: <strong className="text-indigo-600 dark:text-indigo-400">{currentRun.policy_id.replace('policy_', '')}</strong>
             </span>
             <span className="text-slate-500 dark:text-slate-400">
-              Scenario: <strong className="text-rose-600 dark:text-rose-400">{currentRun.scenario_id}</strong>
+              Test Problem: <strong className="text-rose-600 dark:text-rose-400">{currentRun.scenario_id}</strong>
             </span>
           </div>
 
           <div className="flex items-center space-x-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
-            <span>Duration: {currentRun.duration_ms ?? 0}ms</span>
+            <span>Time Taken: {currentRun.duration_ms ?? 0}ms</span>
             <span>Retries: {currentRun.retry_count}</span>
             <span>Seed: {currentRun.seed}</span>
           </div>
@@ -260,9 +260,9 @@ export const TraceExplorer: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500"
           >
-            <option value="all">All Outcomes</option>
-            <option value="success">Succeeded Only</option>
-            <option value="failure">Failed / Faulted Only</option>
+            <option value="all">All Results</option>
+            <option value="success">Completed Successfully</option>
+            <option value="failure">Errors & Problems</option>
           </select>
 
           {/* Tool filter */}
@@ -372,7 +372,7 @@ export const TraceExplorer: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-2.5">
                       <div className="flex items-center space-x-2">
                         <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
-                          Step {step.step_number}: Tool Called
+                          Step {step.step_number}: Tool Used
                         </span>
                         <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold border border-slate-200 dark:border-slate-700">
                           {step.tool_name}
@@ -393,7 +393,7 @@ export const TraceExplorer: React.FC = () => {
                     {/* Plain Language Input Summary */}
                     <div className="text-xs text-slate-600 dark:text-slate-300">
                       <span className="font-medium text-slate-500 dark:text-slate-400 mr-1.5">
-                        Input parameters:
+                        What was sent (Input):
                       </span>
                       <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-800 dark:text-slate-200">
                         {Object.keys(step.input_data || {}).length > 0
@@ -409,7 +409,7 @@ export const TraceExplorer: React.FC = () => {
                           ✓ Result:
                         </span>
                         <span className="text-slate-600 dark:text-slate-400">
-                          Execution successful. Valid data received.
+                          Completed successfully. Good data received.
                         </span>
                       </div>
                     )}
@@ -419,10 +419,10 @@ export const TraceExplorer: React.FC = () => {
                       <div className="mt-3 p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 space-y-1.5 text-xs">
                         <div className="font-semibold text-rose-700 dark:text-rose-300 flex items-center space-x-1.5">
                           <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />
-                          <span>Failure Detected: {step.fault_category || 'Tool Error'}</span>
+                          <span>Problem Detected: {step.fault_category || 'Tool Problem'}</span>
                         </div>
                         <p className="text-rose-600 dark:text-rose-400 text-[11px] leading-relaxed">
-                          The tool call did not complete normally. An injected simulated fault was triggered in this execution step.
+                          The tool call did not complete normally. A simulated test problem was triggered at this step.
                         </p>
                       </div>
                     )}
@@ -432,10 +432,10 @@ export const TraceExplorer: React.FC = () => {
                       <div className="p-3.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50 space-y-1.5 text-xs">
                         <div className="font-semibold text-indigo-700 dark:text-indigo-300 flex items-center space-x-1.5">
                           <Sparkles className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                          <span>Failure Diagnosed: {step.diagnosis_category.replace('_', ' ')}</span>
+                          <span>Problem Diagnosed: {step.diagnosis_category.replace('_', ' ')}</span>
                         </div>
                         <p className="text-indigo-600 dark:text-indigo-400 text-[11px] leading-relaxed">
-                          The agent diagnosed the failure as a <strong>{step.diagnosis_category.replace('_', ' ')}</strong>.
+                          The AI detected the problem as a <strong>{step.diagnosis_category.replace('_', ' ')}</strong>.
                         </p>
                       </div>
                     )}
@@ -445,7 +445,7 @@ export const TraceExplorer: React.FC = () => {
                       <div className="p-3.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 space-y-1.5 text-xs">
                         <div className="font-semibold text-amber-700 dark:text-amber-300 flex items-center space-x-1.5">
                           <RotateCcw className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                          <span>Recovery Action: {stepDecisions[0].decision.toUpperCase()}</span>
+                          <span>Fix Attempted: {stepDecisions[0].decision.toUpperCase()}</span>
                         </div>
                         <p className="text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed">
                           {stepDecisions[0].reason}
@@ -461,7 +461,7 @@ export const TraceExplorer: React.FC = () => {
                         className="text-[11px] text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center space-x-1"
                       >
                         <Code className="h-3 w-3" />
-                        <span>{isRawExpanded ? 'Hide Raw Data' : 'Show Raw Data (JSON)'}</span>
+                        <span>{isRawExpanded ? 'Hide Raw Details' : 'Show Raw Details (JSON)'}</span>
                         {isRawExpanded ? (
                           <ChevronUp className="h-3 w-3" />
                         ) : (
@@ -550,14 +550,14 @@ export const TraceExplorer: React.FC = () => {
             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1728] shadow-xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {currentRun.outcome === 'success' ? 'Task Completed' : 'Task Terminated / Failed'}
+                  {currentRun.outcome === 'success' ? 'Task Finished Successfully' : 'Task Stopped with Error'}
                 </span>
                 <StatusBadge status={currentRun.outcome || currentRun.status} size="sm" />
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 {currentRun.outcome === 'success'
                   ? `Task executed to completion in ${currentRun.duration_ms ?? 0}ms with ${currentRun.retry_count} retries.`
-                  : `Task terminated with ${currentRun.retry_count} retries. ${currentRun.error_message || 'Unhandled failure occurred.'}`}
+                  : `Task stopped with ${currentRun.retry_count} retries. ${currentRun.error_message || 'An error stopped the task.'}`}
               </p>
             </div>
           </div>

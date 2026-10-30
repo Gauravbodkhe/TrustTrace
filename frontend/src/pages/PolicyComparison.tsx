@@ -27,13 +27,13 @@ import { PolicyComparisonResponse } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
 const POLICY_DESCRIPTIONS: Record<string, string> = {
-  policy_a_no_recovery: 'Immediately halt and fail upon the first tool error.',
-  policy_b_immediate_retry: 'Retry the failed tool call immediately without waiting.',
-  policy_c_exponential_backoff: 'Retry with progressive backoff delays (1s, 2s, 4s).',
-  policy_d_fallback_tool: 'Switch to alternative secondary tools or cached response data.',
-  policy_e_llm_correction: 'Analyze the error message and attempt prompt self-correction.',
-  policy_f_human_escalation: 'Pause execution and request human supervisor intervention.',
-  policy_g_budget_aware: 'Dynamically choose the optimal recovery action based on error type and budget.',
+  policy_a_no_recovery: 'Stops immediately upon the first tool error.',
+  policy_b_immediate_retry: 'Tries the failed tool again immediately without waiting.',
+  policy_c_exponential_backoff: 'Waits a short time before trying again (1s, 2s, 4s).',
+  policy_d_fallback_tool: 'Switches to an alternative tool or cached data.',
+  policy_e_llm_correction: 'Inspects the error message and fixes input arguments.',
+  policy_f_human_escalation: 'Pauses execution and asks a person for guidance.',
+  policy_g_budget_aware: 'Smartly chooses the best fix based on error type and retries left.',
 };
 
 export const PolicyComparison: React.FC = () => {
@@ -141,10 +141,10 @@ export const PolicyComparison: React.FC = () => {
             <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400">
               <GitCompare className="h-5 w-5" />
             </div>
-            <span>Policy Comparison</span>
+            <span>Compare Methods</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Compare reliability, recovery success, execution time, and retry costs across all 7 recovery policies.
+            See how all 7 error-handling methods compare side-by-side in real tests.
           </p>
         </div>
 
@@ -156,7 +156,7 @@ export const PolicyComparison: React.FC = () => {
             title="Execute test runs for all 7 recovery policies to produce an apples-to-apples comparison"
           >
             <Play className={`h-3.5 w-3.5 ${runningBatch ? 'animate-spin' : ''}`} />
-            <span>{runningBatch ? 'Running 7 Policies...' : 'Run Comparison Experiment'}</span>
+            <span>{runningBatch ? 'Running 7 Methods...' : 'Run Comparison Test'}</span>
           </button>
 
           <button
@@ -189,10 +189,10 @@ export const PolicyComparison: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Success & Recovery Rate by Strategy
+              Tasks Completed & Errors Fixed by Method
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Side-by-side comparison of overall task completion rate vs. failure recovery rate
+              Side-by-side comparison of completed tasks vs errors fixed
             </p>
           </div>
           <span className="text-[11px] text-slate-400 dark:text-slate-500">
@@ -244,14 +244,14 @@ export const PolicyComparison: React.FC = () => {
                 />
                 <Bar
                   dataKey="taskSuccess"
-                  name="Task Success Rate %"
+                  name="Tasks Completed (%)"
                   fill="#6366f1"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={45}
                 />
                 <Bar
                   dataKey="recoverySuccess"
-                  name="Recovery Success Rate %"
+                  name="Errors Fixed (%)"
                   fill="#10b981"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={45}
@@ -261,17 +261,17 @@ export const PolicyComparison: React.FC = () => {
           ) : (
             <div className="h-full flex flex-col items-center justify-center p-6 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                No policy comparison runs yet
+                No comparison test runs yet
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-                Click "Run Comparison Experiment" above to automatically evaluate all 7 policies under realistic tool faults.
+                Click "Run Comparison Test" above to automatically test all 7 methods with realistic problems.
               </p>
               <button
                 onClick={handleRunComparisonBatch}
                 disabled={runningBatch}
                 className="mt-3 px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500"
               >
-                {runningBatch ? 'Running...' : 'Run Comparison Experiment Now'}
+                {runningBatch ? 'Running...' : 'Run Comparison Test Now'}
               </button>
             </div>
           )}
@@ -283,26 +283,26 @@ export const PolicyComparison: React.FC = () => {
         <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Policy Comparison Matrix
+              Compare All 7 Methods
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Evaluated policies, sample sizes, and empirical recovery metrics
+              Tested methods, runs, and error recovery scores
             </p>
           </div>
-          <span className="text-xs text-slate-400">7 Policies Total</span>
+          <span className="text-xs text-slate-400">7 Methods Total</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 dark:bg-[#0b101c] text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800/80 font-medium">
               <tr>
-                <th className="py-3 px-5">Policy Name</th>
-                <th className="py-3 px-4">Description</th>
-                <th className="py-3 px-4">Tasks Tested</th>
-                <th className="py-3 px-4">Success Rate</th>
-                <th className="py-3 px-4">Recovery Rate</th>
+                <th className="py-3 px-5">Method</th>
+                <th className="py-3 px-4">How It Works</th>
+                <th className="py-3 px-4">Tests Run</th>
+                <th className="py-3 px-4">Tasks Completed</th>
+                <th className="py-3 px-4">Errors Fixed</th>
                 <th className="py-3 px-4">Avg Retries</th>
-                <th className="py-3 px-4">Avg Time</th>
+                <th className="py-3 px-4">Time Taken</th>
                 <th className="py-3 px-5">Cost</th>
               </tr>
             </thead>
@@ -329,12 +329,12 @@ export const PolicyComparison: React.FC = () => {
                         {isBest && (
                           <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
                             <Trophy className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                            <span>Best Performer</span>
+                            <span>Highest Score</span>
                           </span>
                         )}
                         {p.policy_id === 'policy_g_budget_aware' && !isBest && (
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                            Proposed
+                            Recommended
                           </span>
                         )}
                       </div>
@@ -388,63 +388,63 @@ export const PolicyComparison: React.FC = () => {
         </div>
       </div>
 
-      {/* Plain-Language Metric Explanations */}
+      {/* Plain-Language Explanations */}
       <div className="p-5 rounded-xl bg-white dark:bg-[#0f1728] border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-3">
         <div className="flex items-center space-x-2 text-slate-900 dark:text-slate-100 font-semibold text-xs">
           <HelpCircle className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-          <span>Understanding the Benchmark Metrics</span>
+          <span>Understanding the Test Scores</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs flex items-center space-x-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Success Rate</span>
+              <span>Tasks Completed</span>
             </div>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              "Did the agent finish the overall task?"
+              "Did the AI finish the whole task without stopping?"
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              Percentage of tasks that reached a successful conclusion without halting or exceeding retry limits.
+              Percentage of tasks that reached a successful conclusion without halting or running out of retries.
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs flex items-center space-x-1.5">
               <RotateCcw className="h-3.5 w-3.5 text-indigo-500" />
-              <span>Recovery Rate</span>
+              <span>Errors Fixed</span>
             </div>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              "When a tool failed, did the policy fix it?"
+              "When a tool failed, was the error fixed?"
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              Measures how effectively the strategy rescued execution when injected tool errors occurred.
+              Shows how good the method was at saving the task when a tool broke.
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs flex items-center space-x-1.5">
               <Activity className="h-3.5 w-3.5 text-amber-500" />
-              <span>Avg Retries</span>
+              <span>Average Retries</span>
             </div>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
               "How many extra attempts did it take?"
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              A high retry count with low recovery rate indicates wasteful loops; lower retries save tokens.
+              Fewer retries mean faster responses and lower costs.
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs flex items-center space-x-1.5">
               <Clock className="h-3.5 w-3.5 text-slate-500" />
-              <span>Avg Time</span>
+              <span>Time Taken</span>
             </div>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">
-              "How long did it take to complete or fail?"
+              "How long did it take in milliseconds?"
             </p>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              Total wall-clock duration including tool execution, diagnosis, backoff delay, and retries.
+              Total time taken including tool calls, wait delays, and retry attempts.
             </p>
           </div>
         </div>

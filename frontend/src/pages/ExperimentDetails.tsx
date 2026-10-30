@@ -167,7 +167,7 @@ export const ExperimentDetails: React.FC = () => {
           className="flex items-center space-x-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Experiments</span>
+          <span>Back to Previous Tests</span>
         </NavLink>
 
         {/* Export & Actions */}
@@ -194,10 +194,10 @@ export const ExperimentDetails: React.FC = () => {
             href={api.exports.reportUrl(experiment.id)}
             download
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 transition-colors shadow-2xs"
-            title="Download reproducible Markdown report"
+            title="Download Markdown report"
           >
             <FileText className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-            <span>Markdown Report</span>
+            <span>Markdown</span>
           </a>
 
           {experiment.status !== 'running' && (
@@ -207,7 +207,7 @@ export const ExperimentDetails: React.FC = () => {
               className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-colors shadow-xs disabled:opacity-50"
             >
               <Play className={`h-3.5 w-3.5 ${running ? 'animate-spin' : ''}`} />
-              <span>{running ? 'Executing...' : 'Re-Run'}</span>
+              <span>{running ? 'Running...' : 'Run Again'}</span>
             </button>
           )}
         </div>
@@ -254,19 +254,19 @@ export const ExperimentDetails: React.FC = () => {
         {/* Configuration Parameter Badges */}
         <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/60 text-xs">
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-            Strategy: <strong className="text-indigo-600 dark:text-indigo-400">{experiment.policy_id.replace('policy_', '')}</strong>
+            Method: <strong className="text-indigo-600 dark:text-indigo-400">{experiment.policy_id.replace('policy_', '')}</strong>
           </span>
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-            Fault Scenario: <strong className="text-rose-600 dark:text-rose-400">{experiment.scenario_id}</strong>
+            Test Problem: <strong className="text-rose-600 dark:text-rose-400">{experiment.scenario_id}</strong>
           </span>
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-            Agent: <strong className="text-slate-900 dark:text-slate-100">{experiment.agent_type === 'mock' ? 'Simulated Agent' : 'Gemini Flash'}</strong>
+            AI Runner: <strong className="text-slate-900 dark:text-slate-100">{experiment.agent_type === 'mock' ? 'Fast Simulation' : 'Gemini AI'}</strong>
           </span>
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-            Seed: {experiment.seed}
+            Random Seed: {experiment.seed}
           </span>
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-            Trials: {experiment.repetitions}x
+            Runs: {experiment.repetitions}x
           </span>
           <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-[#090d16] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
             Max Retries: {experiment.max_retries}
@@ -277,7 +277,7 @@ export const ExperimentDetails: React.FC = () => {
       {/* Results Summary (5 Key KPI Cards with Tooltips) */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
         <MetricCard
-          label="Tasks Completed"
+          label="Tasks Completed Successfully"
           value={totalRuns > 0 ? `${successfulRuns} of ${totalRuns}` : '0 of 0'}
           icon={CheckCircle2}
           accentColor="emerald"
@@ -286,7 +286,7 @@ export const ExperimentDetails: React.FC = () => {
         />
 
         <MetricCard
-          label="Recovery Success Rate"
+          label="Errors Fixed Successfully"
           value={
             primaryMetric?.recovery_success_rate !== null &&
             primaryMetric?.recovery_success_rate !== undefined
@@ -295,12 +295,12 @@ export const ExperimentDetails: React.FC = () => {
           }
           icon={RotateCcw}
           accentColor="indigo"
-          subtext="Recovered from fault"
-          tooltip="Percentage of tool failures that were successfully recovered without aborting"
+          subtext="Fixed after problem"
+          tooltip="Percentage of problems that the AI fixed successfully without stopping"
         />
 
         <MetricCard
-          label="Diagnosis Accuracy"
+          label="Problem Detection Accuracy"
           value={
             primaryMetric?.diagnosis_accuracy !== null &&
             primaryMetric?.diagnosis_accuracy !== undefined
@@ -309,12 +309,12 @@ export const ExperimentDetails: React.FC = () => {
           }
           icon={ShieldAlert}
           accentColor="amber"
-          subtext="Ground truth matches"
-          tooltip="How often the agent correctly identified the root cause of failure against ground truth"
+          subtext="Correctly found problem"
+          tooltip="How often the AI correctly found the test problem"
         />
 
         <MetricCard
-          label="Avg Execution Time"
+          label="Time Taken"
           value={
             primaryMetric?.mean_latency_ms !== null && primaryMetric?.mean_latency_ms !== undefined
               ? `${Math.round(primaryMetric.mean_latency_ms)}ms`
@@ -323,11 +323,11 @@ export const ExperimentDetails: React.FC = () => {
           icon={Clock}
           accentColor="slate"
           subtext="Per task run"
-          tooltip="Mean wall-clock execution time spent across all executed runs"
+          tooltip="Average time taken across all completed task runs"
         />
 
         <MetricCard
-          label="Retry Count"
+          label="Average Retries"
           value={
             primaryMetric?.avg_retry_count !== null && primaryMetric?.avg_retry_count !== undefined
               ? `${primaryMetric.avg_retry_count} retries`
@@ -336,7 +336,7 @@ export const ExperimentDetails: React.FC = () => {
           icon={Activity}
           accentColor="slate"
           subtext="Average per task"
-          tooltip="Average number of retry attempts required before success or termination"
+          tooltip="Average number of retries before task finished or stopped"
         />
       </div>
 
@@ -345,7 +345,7 @@ export const ExperimentDetails: React.FC = () => {
         <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-3">
           <Lightbulb className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Results Interpretation
+            What the Results Mean
           </h2>
         </div>
 
@@ -372,11 +372,11 @@ export const ExperimentDetails: React.FC = () => {
             </p>
           </div>
 
-          {/* What can I investigate next? */}
+          {/* What can I try next? */}
           <div className="p-4 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 space-y-1.5">
             <div className="font-semibold text-indigo-900 dark:text-indigo-200 flex items-center space-x-1.5">
               <Compass className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>What can I investigate next?</span>
+              <span>What can I try next?</span>
             </div>
             <p className="text-indigo-800/80 dark:text-indigo-300/90 leading-relaxed">
               {interpretation.nextStep}
@@ -386,7 +386,7 @@ export const ExperimentDetails: React.FC = () => {
                 to="/comparison"
                 className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center space-x-1"
               >
-                <span>Compare Recovery Policies</span>
+                <span>Compare Methods</span>
                 <ArrowRight className="h-3 w-3" />
               </NavLink>
             </div>
@@ -399,21 +399,21 @@ export const ExperimentDetails: React.FC = () => {
         <div className="p-4 sm:px-5 sm:py-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Task Execution Runs ({runs.length})
+              Task Runs ({runs.length})
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Individual benchmark task runs. Click "View Trace" to see step-by-step tool execution.
+              Individual task runs. Click "View Activity" to see the step-by-step history.
             </p>
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            {experiment.repetitions} trial(s) per task
+            {experiment.repetitions} run(s) per task
           </span>
         </div>
 
         <div className="overflow-x-auto">
           {runs.length === 0 ? (
             <div className="py-8 text-center text-slate-400 text-xs">
-              No task runs recorded. Click "Re-Run" above to execute.
+              No task runs recorded. Click "Run Again" above to start.
             </div>
           ) : (
             <table className="w-full text-left text-xs">
@@ -421,11 +421,11 @@ export const ExperimentDetails: React.FC = () => {
                 <tr>
                   <th className="py-3 px-5">#</th>
                   <th className="py-3 px-4">Task Name</th>
-                  <th className="py-3 px-4">Outcome</th>
-                  <th className="py-3 px-4">Injected Failure</th>
-                  <th className="py-3 px-4">Retries Used</th>
-                  <th className="py-3 px-4">Execution Time</th>
-                  <th className="py-3 px-5 text-right">Actions</th>
+                  <th className="py-3 px-4">Result</th>
+                  <th className="py-3 px-4">Test Problem</th>
+                  <th className="py-3 px-4">Retries</th>
+                  <th className="py-3 px-4">Time Taken</th>
+                  <th className="py-3 px-5 text-right">Step-by-Step</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -458,7 +458,7 @@ export const ExperimentDetails: React.FC = () => {
                         to={`/traces?runId=${run.id}`}
                         className="px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-medium inline-flex items-center space-x-1 transition-colors border border-indigo-200 dark:border-indigo-800"
                       >
-                        <span>View Trace</span>
+                        <span>View Activity</span>
                         <ChevronRight className="h-3 w-3" />
                       </NavLink>
                     </td>

@@ -37,44 +37,44 @@ const POLICIES_INFO: PolicyCardInfo[] = [
   {
     id: 'policy_a_no_recovery',
     code: 'Policy A',
-    name: 'No Recovery',
-    description: 'The agent immediately fails when any tool encounters an error.',
+    name: 'Stop on Error',
+    description: 'The AI stops immediately when any tool encounters an error.',
   },
   {
     id: 'policy_b_immediate_retry',
     code: 'Policy B',
-    name: 'Immediate Retry',
-    description: 'Retries the failed tool call immediately without waiting.',
+    name: 'Simple Retry',
+    description: 'Tries the same tool again immediately without waiting.',
   },
   {
     id: 'policy_c_exponential_backoff',
     code: 'Policy C',
-    name: 'Exponential Backoff',
-    description: 'Retries with increasing wait times (e.g. 1s, 2s, 4s) to handle temporary errors.',
+    name: 'Wait and Retry',
+    description: 'Waits a short time before trying again to handle temporary connection problems.',
   },
   {
     id: 'policy_d_fallback_tool',
     code: 'Policy D',
-    name: 'Fallback Tool',
-    description: 'Switches to an alternative tool or cached data when the primary tool fails.',
+    name: 'Use Backup Tool',
+    description: 'Switches to a backup tool or cached data if the main tool fails.',
   },
   {
     id: 'policy_e_llm_correction',
     code: 'Policy E',
-    name: 'LLM Self-Correction',
-    description: 'The agent analyzes the error message and attempts to fix its arguments.',
+    name: 'Fix Input Arguments',
+    description: 'The AI inspects the error message and tries fixing its inputs.',
   },
   {
     id: 'policy_f_human_escalation',
     code: 'Policy F',
-    name: 'Human Escalation',
-    description: 'Pauses execution and requests human intervention or clarification.',
+    name: 'Ask Person for Help',
+    description: 'Pauses the test and asks a person for guidance.',
   },
   {
     id: 'policy_g_budget_aware',
     code: 'Policy G',
-    name: 'Budget-Aware Multi-Strategy',
-    description: 'Dynamically chooses the best recovery action based on error type and remaining retry budget.',
+    name: 'Smart Adaptive Recovery',
+    description: 'Checks the type of error and picks the smartest fix based on remaining retries.',
     isProposed: true,
   },
 ];
@@ -251,32 +251,32 @@ export const CreateExperiment: React.FC = () => {
   const scenarioCategories: ScenarioCategoryGroup[] = [
     {
       id: 'no_failure',
-      name: 'No Failure (Baseline)',
-      description: 'Tools always work normally without any injected faults.',
+      name: 'No Problem (Normal Run)',
+      description: 'Tools work normally without any injected problems.',
       scenarios: scenarios.filter((s) => categorizeScenario(s) === 'no_failure'),
     },
     {
       id: 'temporary_errors',
-      name: 'Temporary Service Errors',
-      description: 'Network timeouts, 503 service unavailable, and transient connection blips.',
+      name: 'Temporary Connection Problems',
+      description: 'Network timeouts, 503 service unavailable, and temporary connection drops.',
       scenarios: scenarios.filter((s) => categorizeScenario(s) === 'temporary_errors'),
     },
     {
       id: 'tool_problems',
-      name: 'Tool Problems',
-      description: 'Tool missing, permission denied, or schema argument validation failures.',
+      name: 'Broken or Missing Tools',
+      description: 'Tool missing, permission denied, or invalid inputs sent to tools.',
       scenarios: scenarios.filter((s) => categorizeScenario(s) === 'tool_problems'),
     },
     {
       id: 'invalid_responses',
-      name: 'Invalid Responses',
-      description: 'Malformed JSON, missing required fields, or empty responses returned by tools.',
+      name: 'Bad or Invalid Answers',
+      description: 'Malformed answers, missing required data fields, or empty replies from tools.',
       scenarios: scenarios.filter((s) => categorizeScenario(s) === 'invalid_responses'),
     },
     {
       id: 'data_problems',
-      name: 'Data Problems',
-      description: 'Rate limit quotas exceeded, stale cached responses, or context overflow.',
+      name: 'Limits and Data Errors',
+      description: 'Rate limits, old cached data, or messages that exceed maximum length.',
       scenarios: scenarios.filter((s) => categorizeScenario(s) === 'data_problems'),
     },
   ];
@@ -284,7 +284,7 @@ export const CreateExperiment: React.FC = () => {
   const selectedScenario = scenarios.find((s) => s.id === scenarioId);
   const selectedPolicy = POLICIES_INFO.find((p) => p.id === policyId) || {
     id: policyId,
-    code: 'Custom Policy',
+    code: 'Custom Method',
     name: policyId,
     description: '',
   };
@@ -302,11 +302,11 @@ export const CreateExperiment: React.FC = () => {
   const estimatedTotalRuns = selectedTaskIds.length * repetitions;
 
   const stepTitles = [
-    'Details',
-    'Recovery Strategy',
-    'Failure Scenario',
-    'Benchmark Tasks',
-    'Execution Settings',
+    'Test Details',
+    'How AI Handles Errors',
+    'Choose a Test Problem',
+    'Select Tasks',
+    'Test Settings',
     'Review & Run',
   ];
 
@@ -318,10 +318,10 @@ export const CreateExperiment: React.FC = () => {
           <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400">
             <FlaskConical className="h-5 w-5" />
           </div>
-          <span>New Experiment</span>
+          <span>New Test</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Configure and execute a reliability benchmark to evaluate agent resilience against tool failures.
+          Set up a test to see how the AI handles errors when its tools have problems.
         </p>
       </div>
 
@@ -401,7 +401,7 @@ export const CreateExperiment: React.FC = () => {
                 Step 1: Experiment Details
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Give your test a meaningful name and choose the agent planning provider.
+                Give your test a clear name and choose how the AI should run.
               </p>
             </div>
 
@@ -409,19 +409,19 @@ export const CreateExperiment: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Experiment Name <span className="text-rose-500">*</span>
+                    Test Name <span className="text-rose-500">*</span>
                   </label>
                   <VoiceMicButton
                     onTranscript={(spokenText) => setName(spokenText)}
                     size="sm"
-                    title="Voice type experiment name"
+                    title="Voice type test name"
                   />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Evaluation of Budget-Aware Recovery under Transient Outages"
+                  placeholder="e.g. Testing if waiting and retrying handles connection errors"
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   required
                 />
@@ -430,31 +430,31 @@ export const CreateExperiment: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Hypothesis / Research Notes (Optional)
+                    Notes or Goals (Optional)
                   </label>
                   <VoiceMicButton
                     onTranscript={(spokenText) =>
                       setDescription((prev) => (prev ? `${prev} ${spokenText}` : spokenText))
                     }
                     size="sm"
-                    title="Voice type hypothesis notes"
+                    title="Voice type notes"
                   />
                 </div>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Testing if exponential backoff recovers from rate limits faster than immediate retry"
+                  placeholder="e.g. Testing whether a backup tool recovers faster than waiting and retrying"
                   rows={3}
                   className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
                 <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Example: "Testing whether fallback caching yields lower recovery latency compared to prompt self-correction."
+                  Example: "Testing whether a backup tool recovers faster than prompt self-correction."
                 </span>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Agent Planning Provider
+                  How the AI Runs
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div
@@ -469,7 +469,7 @@ export const CreateExperiment: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Bot className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                         <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                          Simulated Agent (Deterministic, Fast)
+                          Fast Simulation (Free & Instant)
                         </span>
                       </div>
                       {agentType === 'mock' && (
@@ -477,10 +477,10 @@ export const CreateExperiment: React.FC = () => {
                       )}
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                      100% free, instant, and deterministic — recommended for evaluating recovery policies and testing failure behaviors reliably.
+                      100% free, instant, and predictable — best for testing error handling and learning without any costs.
                     </p>
                     <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
-                      Recommended for Benchmarks
+                      Recommended (Free)
                     </span>
                   </div>
 
@@ -496,7 +496,7 @@ export const CreateExperiment: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                         <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                          Gemini Flash (Real LLM)
+                          Real Gemini AI (Google Cloud)
                         </span>
                       </div>
                       {agentType === 'gemini' && (
@@ -504,7 +504,7 @@ export const CreateExperiment: React.FC = () => {
                       )}
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                      Sends real prompts to Google Gemini Flash. Requires an API key in your environment and evaluates actual LLM behavior.
+                      Sends real prompts to Google Gemini Flash. Requires an API key in your settings.
                     </p>
                     <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                       Requires GEMINI_API_KEY
@@ -516,15 +516,15 @@ export const CreateExperiment: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 2: Choose Recovery Strategy */}
+        {/* STEP 2: Choose How AI Handles Errors */}
         {currentStep === 2 && (
           <div className="space-y-4">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                Step 2: Choose Recovery Strategy
+                Step 2: How the AI Handles Errors
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Select how the AI agent should react when a tool execution fails.
+                Choose what the AI should do when a tool encounters an error.
               </p>
             </div>
 
@@ -548,7 +548,7 @@ export const CreateExperiment: React.FC = () => {
                         </span>
                         {policy.isProposed && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white shadow-2xs">
-                            ★ Proposed Strategy
+                            ★ Recommended Method
                           </span>
                         )}
                       </div>
@@ -575,15 +575,15 @@ export const CreateExperiment: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 3: Choose Failure Scenario */}
+        {/* STEP 3: Choose a Test Problem */}
         {currentStep === 3 && (
           <div className="space-y-4">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                Step 3: Choose Failure Scenario
+                Step 3: Choose a Test Problem
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Select an injected fault mode to simulate realistic tool and environment failures.
+                Choose what kind of problem to test the AI with.
               </p>
             </div>
 
@@ -689,16 +689,16 @@ export const CreateExperiment: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 4: Select Benchmark Tasks */}
+        {/* STEP 4: Select Tasks to Run */}
         {currentStep === 4 && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                  Step 4: Select Benchmark Tasks
+                  Step 4: Select Tasks to Run
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Choose which standardized multi-step agent tasks to include in this evaluation.
+                  Choose which tasks the AI should try to complete.
                 </p>
               </div>
 
@@ -730,7 +730,7 @@ export const CreateExperiment: React.FC = () => {
                 <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Filter tasks..."
+                  placeholder="Search tasks..."
                   value={taskSearch}
                   onChange={(e) => setTaskSearch(e.target.value)}
                   className="w-full pl-8 pr-9 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-sans"
@@ -739,7 +739,7 @@ export const CreateExperiment: React.FC = () => {
                   <VoiceMicButton
                     onTranscript={(spokenText) => setTaskSearch(spokenText)}
                     size="sm"
-                    title="Voice search benchmark tasks"
+                    title="Voice search tasks"
                   />
                 </div>
               </div>
@@ -787,15 +787,15 @@ export const CreateExperiment: React.FC = () => {
           </div>
         )}
 
-        {/* STEP 5: Configure Execution */}
+        {/* STEP 5: Test Settings */}
         {currentStep === 5 && (
           <div className="space-y-5">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                Step 5: Configure Execution
+                Step 5: Test Settings
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Set repetition counts, random seed, retry limits, and optional resource budgets.
+                Choose how many times to repeat tasks, retry limits, and time limits.
               </p>
             </div>
 
@@ -803,10 +803,10 @@ export const CreateExperiment: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                 <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                  Number of Trials
+                  Number of Runs
                 </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
-                  How many times to repeat each benchmark task for statistical significance.
+                  How many times to repeat each task for fair scoring.
                 </p>
                 <input
                   type="number"
@@ -823,7 +823,7 @@ export const CreateExperiment: React.FC = () => {
                   Random Seed
                 </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
-                  Controls determinism and reproducibility of tool mock responses and faults.
+                  Keeps tests repeatable so results can be checked again.
                 </p>
                 <input
                   type="number"
@@ -835,10 +835,10 @@ export const CreateExperiment: React.FC = () => {
 
               <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                 <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                  Max Retries
+                  Maximum Retries
                 </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
-                  Maximum number of retry attempts allowed before a task run is terminated.
+                  How many extra attempts the AI can make before stopping.
                 </p>
                 <input
                   type="number"
@@ -852,10 +852,10 @@ export const CreateExperiment: React.FC = () => {
 
               <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                 <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">
-                  Timeout per Task (seconds)
+                  Time Limit per Task (seconds)
                 </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
-                  Maximum execution wall-clock time permitted before aborting.
+                  Maximum clock time permitted before stopping.
                 </p>
                 <input
                   type="number"
@@ -949,10 +949,10 @@ export const CreateExperiment: React.FC = () => {
           <div className="space-y-5">
             <div>
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-                Step 6: Review & Run Experiment
+                Step 6: Review & Start Test
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Review your trial parameters before triggering agent execution.
+                Check your settings before starting the test.
               </p>
             </div>
 
@@ -960,21 +960,21 @@ export const CreateExperiment: React.FC = () => {
             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 space-y-3.5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Experiment Name</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Test Name</span>
                   <div className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{name}</div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Agent Provider</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">How the AI Runs</span>
                   <div className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
-                    {agentType === 'mock' ? 'Simulated Agent (Deterministic)' : 'Gemini Flash (Real LLM)'}
+                    {agentType === 'mock' ? 'Fast Simulation (Free)' : 'Real Gemini AI'}
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Recovery Strategy</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">How AI Handles Errors</span>
                   <div className="font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
                     {selectedPolicy.code}: {selectedPolicy.name}
                   </div>
@@ -984,7 +984,7 @@ export const CreateExperiment: React.FC = () => {
                 </div>
 
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Fault Scenario</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Test Problem</span>
                   <div className="font-semibold text-rose-600 dark:text-rose-400 mt-0.5">
                     {selectedScenario?.name || scenarioId}
                   </div>
@@ -996,21 +996,21 @@ export const CreateExperiment: React.FC = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Benchmark Tasks</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Tasks to Run</span>
                   <div className="font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                     {selectedTaskIds.length} tasks
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Trials per Task</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Runs per Task</span>
                   <div className="font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                     {repetitions}x
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Max Retries / Timeout</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">Max Retries / Time Limit</span>
                   <div className="font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                     {maxRetries} retries / {timeoutSeconds}s
                   </div>
@@ -1018,7 +1018,7 @@ export const CreateExperiment: React.FC = () => {
 
                 <div className="bg-indigo-50 dark:bg-indigo-950/40 p-2 rounded-lg border border-indigo-200 dark:border-indigo-800">
                   <span className="text-indigo-700 dark:text-indigo-300 font-semibold text-[11px]">
-                    Estimated Total Runs
+                    Total Steps to Run
                   </span>
                   <div className="font-mono font-bold text-indigo-800 dark:text-indigo-200 text-sm mt-0.5">
                     {estimatedTotalRuns} runs
@@ -1032,9 +1032,9 @@ export const CreateExperiment: React.FC = () => {
               <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/40 flex items-center space-x-3 text-xs text-indigo-800 dark:text-indigo-200">
                 <Play className="h-4 w-4 animate-spin text-indigo-600 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold">Executing experiment benchmark runs...</p>
+                  <p className="font-semibold">Running test runs now...</p>
                   <p className="text-[11px] text-indigo-600 dark:text-indigo-400 mt-0.5">
-                    Simulating tool failures, recording execution traces, and calculating metrics. You will be redirected automatically upon completion.
+                    Testing tool failures, saving step-by-step activity, and calculating scores. You will be redirected automatically.
                   </p>
                 </div>
               </div>
@@ -1091,7 +1091,7 @@ export const CreateExperiment: React.FC = () => {
               className="flex items-center space-x-2 px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-sm shadow-indigo-600/30 disabled:opacity-50"
             >
               <Play className={`h-4 w-4 ${submitting ? 'animate-spin' : ''}`} />
-              <span>{submitting ? 'Running Experiment...' : 'Run Experiment'}</span>
+              <span>{submitting ? 'Running Test...' : 'Start Test Now'}</span>
             </button>
           </div>
         )}
