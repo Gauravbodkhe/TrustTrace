@@ -298,9 +298,15 @@ export const AppLayout: React.FC = () => {
             <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800/60 space-y-1 font-mono text-[10px] text-slate-500 dark:text-slate-400">
               <div className="flex items-center justify-between">
                 <span>Database:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-200">
+                <span className={`font-semibold ${
+                  health?.database === 'ok'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : isHealthy === false
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : 'text-amber-500'
+                }`}>
                   {health?.database === 'ok'
-                    ? 'Connected (Fast)'
+                    ? `Online (${health?.db_type === 'postgresql' ? 'PostgreSQL' : 'SQLite'})`
                     : isHealthy === false
                     ? 'Offline'
                     : 'Connecting...'}
@@ -378,11 +384,27 @@ export const AppLayout: React.FC = () => {
           {/* Right Action Cluster */}
           <div className="flex items-center space-x-2.5">
             {/* Database indicator */}
-            <div className="hidden sm:flex items-center space-x-1.5 text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
-              <Database className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <div className={`hidden sm:flex items-center space-x-1.5 text-xs font-mono px-2.5 py-1 rounded-lg border ${
+              health?.database === 'ok'
+                ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300'
+                : isHealthy === false
+                ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/40 text-rose-800 dark:text-rose-300'
+                : 'bg-slate-100 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+            }`}>
+              <Database className={`h-3.5 w-3.5 ${
+                health?.database === 'ok'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : isHealthy === false
+                  ? 'text-rose-500'
+                  : 'text-amber-500'
+              }`} />
               <span>DB:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">
-                {health?.database === 'ok' ? 'Connected' : isHealthy === false ? 'Offline' : 'Connecting...'}
+              <span className="font-semibold">
+                {health?.database === 'ok'
+                  ? `Online (${health?.db_type === 'postgresql' ? 'PG' : 'SQLite'})`
+                  : isHealthy === false
+                  ? 'Offline'
+                  : 'Connecting...'}
               </span>
             </div>
 

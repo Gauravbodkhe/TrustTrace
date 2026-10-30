@@ -41,6 +41,8 @@ class DiagnosisEngine:
     MALFORMED_KEYWORDS = ["malformed", "parse error", "json", "syntax error"]
     SCHEMA_KEYWORDS = ["schema validation", "schema", "wrong type", "type mismatch"]
     MISSING_FIELDS_KEYWORDS = ["missing required", "missing field", "required field"]
+    AUTH_KEYWORDS = ["authentication failed", "unauthorized", "invalid or expired credentials", "401", "forbidden", "403"]
+    NETWORK_KEYWORDS = ["network connection reset", "connection reset", "econnreset", "socket closed", "connection aborted", "network failure"]
 
     def diagnose(
         self,
@@ -116,6 +118,14 @@ class DiagnosisEngine:
         if any(kw in error_msg for kw in self.MISSING_FIELDS_KEYWORDS):
             evidence.append("error_message contains missing-fields keyword")
             return FaultCategory.MISSING_FIELDS.value
+
+        if any(kw in error_msg for kw in self.AUTH_KEYWORDS):
+            evidence.append("error_message contains authentication-failure keyword")
+            return FaultCategory.AUTH_FAILURE.value
+
+        if any(kw in error_msg for kw in self.NETWORK_KEYWORDS):
+            evidence.append("error_message contains network-failure keyword")
+            return FaultCategory.NETWORK_FAILURE.value
 
         # ── Output shape analysis ────────────────────────────────────────────
         if status == ToolStatus.FAILURE:

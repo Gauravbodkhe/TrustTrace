@@ -157,3 +157,23 @@ class MetricSummary(Base):
     estimated_cost_usd: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     sample_size: Mapped[int] = mapped_column(Integer, default=0)
     calculated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class SampleTestCase(Base):
+    __tablename__ = "sample_test_cases"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)  # e.g. "TC-001"
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    fault_category: Mapped[str] = mapped_column(String(64), nullable=False)
+    scenario_id: Mapped[str] = mapped_column(String(64), ForeignKey("fault_scenarios.id"), nullable=False)
+    expected_recovery: Mapped[str] = mapped_column(String(100), nullable=False)
+    recommended_policy_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    task_ids: Mapped[list] = mapped_column(JSON, nullable=False)
+    default_params: Mapped[dict] = mapped_column(JSON, default=dict)
+    is_sample: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    scenario: Mapped[FaultScenario] = relationship("FaultScenario")
+

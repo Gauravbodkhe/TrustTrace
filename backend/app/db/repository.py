@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     Experiment, ExperimentRun, ExecutionTrace,
-    RecoveryDecision, FaultScenario, Task, MetricSummary
+    RecoveryDecision, FaultScenario, Task, MetricSummary, SampleTestCase
 )
 from app.services.agent_runner import RunResult, TraceStep, RecoveryRecord
 
@@ -83,6 +83,178 @@ def create_scenario(db: Session, data: Any) -> FaultScenario:
     return scenario
 
 
+# ─────────────────────────── Sample Test Cases ─────────────────────────────
+
+SAMPLE_TEST_CASES = [
+    {
+        "id": "TC-001",
+        "name": "API Timeout",
+        "description": "Simulates external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
+        "fault_category": "timeout",
+        "scenario_id": "timeout_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-002",
+        "name": "Tool Unavailable",
+        "description": "Simulates complete service outage (HTTP 503) at step 2. Evaluates dynamic failover to registered backup tool.",
+        "fault_category": "tool_unavailable",
+        "scenario_id": "tool_unavailable_step2",
+        "expected_recovery": "Fallback",
+        "recommended_policy_id": "policy_d_fallback",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-003",
+        "name": "Malformed JSON",
+        "description": "Tool returns corrupt or unparseable JSON syntax at step 1. Evaluates parser validation and retry.",
+        "fault_category": "malformed_json",
+        "scenario_id": "malformed_json_step1",
+        "expected_recovery": "Validation and Retry",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-004",
+        "name": "Missing Fields",
+        "description": "Tool returns partial payload missing required keys at step 2. Evaluates schema validation failure detection.",
+        "fault_category": "missing_fields",
+        "scenario_id": "missing_fields_step2",
+        "expected_recovery": "Validation",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-005",
+        "name": "Invalid Arguments",
+        "description": "Agent supplies invalid parameter types to tool at step 1. Evaluates safe stop to prevent downstream corruption.",
+        "fault_category": "invalid_arguments",
+        "scenario_id": "invalid_args_step1",
+        "expected_recovery": "Safe Stop",
+        "recommended_policy_id": "policy_e_safe_stop",
+        "task_ids": ["task_cost_analysis"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-006",
+        "name": "Empty Response",
+        "description": "Tool returns HTTP 200 with empty body {} at step 2. Evaluates retry or secondary tool fallback.",
+        "fault_category": "empty_response",
+        "scenario_id": "empty_response_step2",
+        "expected_recovery": "Retry or Fallback",
+        "recommended_policy_id": "policy_d_fallback",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-007",
+        "name": "Stale Data",
+        "description": "Tool returns data marked older than freshness threshold (72 hours stale). Evaluates cache invalidation.",
+        "fault_category": "stale_data",
+        "scenario_id": "stale_data_step1",
+        "expected_recovery": "Validate Freshness",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_inventory_count"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-008",
+        "name": "Rate Limit",
+        "description": "Tool returns HTTP 429 quota exhaustion. Evaluates budget-aware backoff respecting execution budget.",
+        "fault_category": "rate_limit",
+        "scenario_id": "rate_limit_step1",
+        "expected_recovery": "Budget-Aware Recovery",
+        "recommended_policy_id": "policy_g_budget_aware",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-009",
+        "name": "Authentication Failure",
+        "description": "Simulates HTTP 401 Unauthorized or expired credentials at step 1. Evaluates immediate safe stop.",
+        "fault_category": "auth_failure",
+        "scenario_id": "auth_failure_step1",
+        "expected_recovery": "Safe Stop",
+        "recommended_policy_id": "policy_e_safe_stop",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-010",
+        "name": "Network Failure",
+        "description": "Simulates socket reset (ECONNRESET) at step 1. Evaluates bounded reconnection retry.",
+        "fault_category": "network_failure",
+        "scenario_id": "network_failure_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+]
+
+
+def seed_sample_test_cases(db: Session) -> int:
+    """Insert built-in sample test cases if they don't exist. Idempotent across restarts."""
+    inserted = 0
+    for tc_data in SAMPLE_TEST_CASES:
+        existing = db.get(SampleTestCase, tc_data["id"])
+        if existing is None:
+            tc = SampleTestCase(**tc_data)
+            db.add(tc)
+            inserted += 1
+    db.flush()
+    return inserted
+
+
+def list_sample_test_cases(db: Session, sample_only: bool = False) -> List[SampleTestCase]:
+    stmt = select(SampleTestCase).order_by(SampleTestCase.id)
+    if sample_only:
+        stmt = stmt.where(SampleTestCase.is_sample == True)
+    result = db.execute(stmt)
+    return list(result.scalars().all())
+
+
+def get_sample_test_case(db: Session, case_id: str) -> Optional[SampleTestCase]:
+    return db.get(SampleTestCase, case_id)
+
+
+def create_sample_test_case(db: Session, data: Any) -> SampleTestCase:
+    payload = data.model_dump() if hasattr(data, "model_dump") else dict(data)
+    case_id = payload.get("id") or f"TC-CUSTOM-{str(uuid.uuid4())[:6].upper()}"
+    tc = SampleTestCase(id=case_id, **{k: v for k, v in payload.items() if k != "id"})
+    db.add(tc)
+    db.flush()
+    return tc
+
+
+def update_sample_test_case(db: Session, case_id: str, updates: Any) -> Optional[SampleTestCase]:
+    tc = db.get(SampleTestCase, case_id)
+    if tc is None:
+        return None
+    payload = updates.model_dump(exclude_unset=True) if hasattr(updates, "model_dump") else dict(updates)
+    for key, val in payload.items():
+        if hasattr(tc, key) and val is not None:
+            setattr(tc, key, val)
+    db.flush()
+    return tc
+
+
 def update_scenario(db: Session, scenario_id: str, updates: Any) -> Optional[FaultScenario]:
     scenario = db.get(FaultScenario, scenario_id)
     if scenario is None:
@@ -93,6 +265,178 @@ def update_scenario(db: Session, scenario_id: str, updates: Any) -> Optional[Fau
             setattr(scenario, key, val)
     db.flush()
     return scenario
+
+
+# ─────────────────────────── Sample Test Cases ─────────────────────────────
+
+SAMPLE_TEST_CASES = [
+    {
+        "id": "TC-001",
+        "name": "API Timeout",
+        "description": "Simulates external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
+        "fault_category": "timeout",
+        "scenario_id": "timeout_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-002",
+        "name": "Tool Unavailable",
+        "description": "Simulates complete service outage (HTTP 503) at step 2. Evaluates dynamic failover to registered backup tool.",
+        "fault_category": "tool_unavailable",
+        "scenario_id": "tool_unavailable_step2",
+        "expected_recovery": "Fallback",
+        "recommended_policy_id": "policy_d_fallback",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-003",
+        "name": "Malformed JSON",
+        "description": "Tool returns corrupt or unparseable JSON syntax at step 1. Evaluates parser validation and retry.",
+        "fault_category": "malformed_json",
+        "scenario_id": "malformed_json_step1",
+        "expected_recovery": "Validation and Retry",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-004",
+        "name": "Missing Fields",
+        "description": "Tool returns partial payload missing required keys at step 2. Evaluates schema validation failure detection.",
+        "fault_category": "missing_fields",
+        "scenario_id": "missing_fields_step2",
+        "expected_recovery": "Validation",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-005",
+        "name": "Invalid Arguments",
+        "description": "Agent supplies invalid parameter types to tool at step 1. Evaluates safe stop to prevent downstream corruption.",
+        "fault_category": "invalid_arguments",
+        "scenario_id": "invalid_args_step1",
+        "expected_recovery": "Safe Stop",
+        "recommended_policy_id": "policy_e_safe_stop",
+        "task_ids": ["task_cost_analysis"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-006",
+        "name": "Empty Response",
+        "description": "Tool returns HTTP 200 with empty body {} at step 2. Evaluates retry or secondary tool fallback.",
+        "fault_category": "empty_response",
+        "scenario_id": "empty_response_step2",
+        "expected_recovery": "Retry or Fallback",
+        "recommended_policy_id": "policy_d_fallback",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-007",
+        "name": "Stale Data",
+        "description": "Tool returns data marked older than freshness threshold (72 hours stale). Evaluates cache invalidation.",
+        "fault_category": "stale_data",
+        "scenario_id": "stale_data_step1",
+        "expected_recovery": "Validate Freshness",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_inventory_count"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-008",
+        "name": "Rate Limit",
+        "description": "Tool returns HTTP 429 quota exhaustion. Evaluates budget-aware backoff respecting execution budget.",
+        "fault_category": "rate_limit",
+        "scenario_id": "rate_limit_step1",
+        "expected_recovery": "Budget-Aware Recovery",
+        "recommended_policy_id": "policy_g_budget_aware",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-009",
+        "name": "Authentication Failure",
+        "description": "Simulates HTTP 401 Unauthorized or expired credentials at step 1. Evaluates immediate safe stop.",
+        "fault_category": "auth_failure",
+        "scenario_id": "auth_failure_step1",
+        "expected_recovery": "Safe Stop",
+        "recommended_policy_id": "policy_e_safe_stop",
+        "task_ids": ["task_order_lookup"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-010",
+        "name": "Network Failure",
+        "description": "Simulates socket reset (ECONNRESET) at step 1. Evaluates bounded reconnection retry.",
+        "fault_category": "network_failure",
+        "scenario_id": "network_failure_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+]
+
+
+def seed_sample_test_cases(db: Session) -> int:
+    """Insert built-in sample test cases if they don't exist. Idempotent across restarts."""
+    inserted = 0
+    for tc_data in SAMPLE_TEST_CASES:
+        existing = db.get(SampleTestCase, tc_data["id"])
+        if existing is None:
+            tc = SampleTestCase(**tc_data)
+            db.add(tc)
+            inserted += 1
+    db.flush()
+    return inserted
+
+
+def list_sample_test_cases(db: Session, sample_only: bool = False) -> List[SampleTestCase]:
+    stmt = select(SampleTestCase).order_by(SampleTestCase.id)
+    if sample_only:
+        stmt = stmt.where(SampleTestCase.is_sample == True)
+    result = db.execute(stmt)
+    return list(result.scalars().all())
+
+
+def get_sample_test_case(db: Session, case_id: str) -> Optional[SampleTestCase]:
+    return db.get(SampleTestCase, case_id)
+
+
+def create_sample_test_case(db: Session, data: Any) -> SampleTestCase:
+    payload = data.model_dump() if hasattr(data, "model_dump") else dict(data)
+    case_id = payload.get("id") or f"TC-CUSTOM-{str(uuid.uuid4())[:6].upper()}"
+    tc = SampleTestCase(id=case_id, **{k: v for k, v in payload.items() if k != "id"})
+    db.add(tc)
+    db.flush()
+    return tc
+
+
+def update_sample_test_case(db: Session, case_id: str, updates: Any) -> Optional[SampleTestCase]:
+    tc = db.get(SampleTestCase, case_id)
+    if tc is None:
+        return None
+    payload = updates.model_dump(exclude_unset=True) if hasattr(updates, "model_dump") else dict(updates)
+    for key, val in payload.items():
+        if hasattr(tc, key) and val is not None:
+            setattr(tc, key, val)
+    db.flush()
+    return tc
 
 
 # ─────────────────────────── Experiments ───────────────────────────────────
@@ -266,7 +610,9 @@ def get_metric_summaries_for_experiment(
 
 def get_dashboard_stats(db: Session) -> Dict[str, Any]:
     total_experiments = db.execute(select(func.count(Experiment.id))).scalar() or 0
+    completed_experiments = db.execute(select(func.count(Experiment.id)).where(Experiment.status == "completed")).scalar() or 0
     total_runs = db.execute(select(func.count(ExperimentRun.id))).scalar() or 0
+    total_sample_cases = db.execute(select(func.count(SampleTestCase.id))).scalar() or 0
 
     outcomes = db.execute(
         select(ExperimentRun.outcome, func.count(ExperimentRun.id).label("cnt"))
@@ -327,6 +673,8 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
 
     return {
         "total_experiments": total_experiments,
+        "completed_experiments": completed_experiments,
+        "total_sample_cases": total_sample_cases,
         "total_runs": total_runs,
         "task_success_rate": round(task_success_rate, 4) if task_success_rate is not None else None,
         "recovery_success_rate": recovery_success_rate,

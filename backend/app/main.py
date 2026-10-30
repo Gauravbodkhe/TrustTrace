@@ -9,9 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.db import init_db, SessionLocal
+from app.db import init_db, SessionLocal, get_db_type
 from app.db import repository as repo
-from app.api.routes import health, experiments, scenarios, traces, metrics, exports, evidence, reports
+from app.api.routes import health, experiments, scenarios, traces, metrics, exports, evidence, reports, test_cases
 
 
 @asynccontextmanager
@@ -24,12 +24,16 @@ async def lifespan(app: FastAPI):
     # Initialize database tables
     init_db()
 
-    # Seed benchmark data
+    # Seed benchmark data & sample test cases
     with SessionLocal() as db:
         task_count = repo.seed_benchmark_tasks(db)
         scenario_count = repo.seed_scenarios(db)
+        sample_tc_count = repo.seed_sample_test_cases(db)
         db.commit()
-        logger.info("Seeded %d tasks and %d fault scenarios", task_count, scenario_count)
+        logger.info(
+            "Database ready: %d benchmark tasks, %d fault scenarios, %d sample test cases loaded",
+            task_count, scenario_count, sample_tc_count
+        )
 
     yield
 
@@ -74,6 +78,7 @@ app.include_router(metrics.router)
 app.include_router(exports.router)
 app.include_router(evidence.router)
 app.include_router(reports.router)
+app.include_router(test_cases.router)
 
 
 @app.get("/")
@@ -84,5 +89,6 @@ def root():
         "description": "AI Agent Reliability Testing and Recovery Platform",
         "docs": "/docs",
         "health": "/health",
+        "database_type": get_db_type(),
         "mock_mode": not settings.gemini_available,
     }

@@ -26,6 +26,59 @@
 
 ---
 
+## 🗄️ Database Setup & Permanent Persistence
+
+TrustTrace supports **dual database persistence**:
+1. **Local Development (Default):** Zero-credential, file-backed **SQLite** with Write-Ahead Logging (WAL). Requires zero external configuration and works offline immediately.
+2. **Production Deployment (Supabase PostgreSQL):** Cloud-hosted PostgreSQL ensuring data permanence across Render deployments and container restarts.
+
+### 1. Local Development (SQLite)
+If `DATABASE_URL` is not set, TrustTrace automatically defaults to:
+```
+DATABASE_URL=sqlite:///./trusttrace.db
+```
+Tables are auto-created idempotently on startup. Standard benchmark tasks and sample test cases are seeded without duplicating on restarts.
+
+### 2. Production Persistence with Supabase
+Render instances run on ephemeral filesystems where local SQLite databases reset upon every deploy or restart. Connecting to **Supabase PostgreSQL** provides permanent storage for all test results, traces, and metrics.
+
+#### Step 1: Create a Free Supabase Project
+1. Go to [supabase.com](https://supabase.com) and create a free project.
+2. Under **Project Settings &rarr; Database**, find your **Connection String**.
+3. Select **URI** (Connection pooling port `6543` or direct port `5432`).
+4. Replace `[YOUR-PASSWORD]` with your actual database password:
+   ```
+   postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+   ```
+
+#### Step 2: Configure DATABASE_URL in Render
+1. Open your backend web service dashboard on [render.com](https://dashboard.render.com).
+2. Navigate to **Environment**.
+3. Add or update the environment variable:
+   - **Key:** `DATABASE_URL`
+   - **Value:** Your Supabase connection string (e.g. `postgresql://postgres:password@db.xxx.supabase.co:5432/postgres`)
+4. Save Changes. Render will redeploy automatically.
+5. TrustTrace will connect using connection pooling (`pool_pre_ping=True`, `sslmode=require`) and create all tables idempotently.
+
+#### Step 3: Migrate Existing SQLite Data to PostgreSQL (Optional)
+To transfer existing local test history and custom scenarios to Supabase without data loss, run the safe migration script:
+```powershell
+python backend/scripts/migrate_sqlite_to_postgres.py --sqlite trusttrace.db --postgres "postgresql://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres"
+```
+The script validates both connections, ensures target tables exist, and migrates all records with duplicate prevention.
+
+#### Step 4: Database Migrations with Alembic
+Alembic migrations are configured to manage schema evolutions safely:
+```powershell
+# Run pending migrations
+alembic upgrade head
+
+# Check current revision
+alembic current
+```
+
+---
+
 ## 1. Problem Statement & Research Objective
 
 Tool-using AI agents inevitably encounter runtime exceptions when querying external systems: network timeouts, malformed JSON responses, rate limits, schema mismatches, and transient server outages. Naive retry loops increase latency, inflate API token costs, and risk propagating corrupt data into downstream decision pipelines.
@@ -226,7 +279,27 @@ npm run build
 
 ---
 
-## 10. Research Reports & Vector PDF Exports
+## 🧪 Standard Sample Test Cases (10 Benchmark Cases)
+
+TrustTrace includes 10 pre-configured sample test cases permanently stored in the database (`sample_test_cases` table). Users can run each case with one click, or duplicate and customize parameters:
+
+| Case ID | Test Name | Injected Fault | Expected Recovery | Recommended Policy |
+| :--- | :--- | :--- | :--- | :--- |
+| **TC-001** | API Timeout | Tool call exceeds deadline (timeout) | Bounded Retry | Policy B: Bounded Retry |
+| **TC-002** | Tool Unavailable | Service outage (HTTP 503) | Fallback | Policy D: Fallback |
+| **TC-003** | Malformed JSON | Syntax error in tool JSON response | Validation and Retry | Policy C: Validation Retry |
+| **TC-004** | Missing Fields | Required schema fields absent | Validation | Policy C: Validation Retry |
+| **TC-005** | Invalid Arguments | Invalid parameter types provided | Safe Stop | Policy E: Safe Stop |
+| **TC-006** | Empty Response | HTTP 200 returned with `{}` body | Retry or Fallback | Policy D: Fallback |
+| **TC-007** | Stale Data | Data age exceeds 72h threshold | Validate Freshness | Policy C: Validation Retry |
+| **TC-008** | Rate Limit | HTTP 429 quota exhaustion | Budget-Aware Recovery | Policy G: Budget-Aware |
+| **TC-009** | Authentication Failure | HTTP 401 unauthorized / expired key | Safe Stop | Policy E: Safe Stop |
+| **TC-010** | Network Failure | Socket reset (ECONNRESET) | Bounded Retry | Policy B: Bounded Retry |
+
+- **No fake results:** Sample cases remain purely configuration templates until explicitly run. Actual traces and metrics are saved only upon execution.
+- **Idempotent restarts:** Seeding checks primary keys (`TC-001` .. `TC-010`) to prevent duplicate records upon backend restarts.
+
+---
 
 Every experiment records run-level telemetry with exact timestamps, step inputs/outputs (redacted), diagnoses, and recovery decisions.
 

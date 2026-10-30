@@ -27,6 +27,13 @@ vi.mock('../services/api', () => ({
         },
       ]),
     },
+    testCases: {
+      list: vi.fn().mockResolvedValue([]),
+      get: vi.fn().mockResolvedValue(null),
+      create: vi.fn(),
+      update: vi.fn(),
+      run: vi.fn(),
+    },
     scenarios: {
       list: vi.fn().mockResolvedValue([
         {

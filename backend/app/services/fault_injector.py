@@ -25,6 +25,8 @@ class FaultCategory(str, Enum):
     TRANSIENT_ERROR = "transient_error"
     RATE_LIMIT = "rate_limit"
     SCHEMA_VALIDATION = "schema_validation"
+    AUTH_FAILURE = "auth_failure"
+    NETWORK_FAILURE = "network_failure"
     NONE = "none"
 
 
@@ -150,6 +152,24 @@ def _make_schema_validation_fault() -> ToolResult:
     )
 
 
+def _make_auth_failure_fault() -> ToolResult:
+    return ToolResult(
+        status=ToolStatus.FAILURE,
+        output=None,
+        error_message="Authentication failed: HTTP 401 Unauthorized — invalid or expired credentials (simulated)",
+        latency_ms=10,
+    )
+
+
+def _make_network_failure_fault() -> ToolResult:
+    return ToolResult(
+        status=ToolStatus.FAILURE,
+        output=None,
+        error_message="Network connection reset by peer: ECONNRESET (simulated socket error) — safe to retry",
+        latency_ms=35,
+    )
+
+
 _FAULT_GENERATORS = {
     FaultCategory.TIMEOUT: _make_timeout_fault,
     FaultCategory.TOOL_UNAVAILABLE: _make_unavailable_fault,
@@ -161,6 +181,8 @@ _FAULT_GENERATORS = {
     FaultCategory.TRANSIENT_ERROR: _make_transient_error_fault,
     FaultCategory.RATE_LIMIT: _make_rate_limit_fault,
     FaultCategory.SCHEMA_VALIDATION: _make_schema_validation_fault,
+    FaultCategory.AUTH_FAILURE: _make_auth_failure_fault,
+    FaultCategory.NETWORK_FAILURE: _make_network_failure_fault,
 }
 
 
@@ -379,6 +401,30 @@ BUILTIN_SCENARIOS: Dict[str, Dict] = {
         "failure_delay_ms": 0,
         "severity": "medium",
         "seed": 2024,
+        "is_active": True,
+    },
+    "auth_failure_step1": {
+        "id": "auth_failure_step1",
+        "name": "Authentication Failure at Step 1",
+        "description": "Step 1 encounters HTTP 401 Unauthorized or expired credentials. Expected recovery: Safe Stop.",
+        "category": "auth_failure",
+        "probability": 1.0,
+        "deterministic_step": 1,
+        "failure_delay_ms": 0,
+        "severity": "critical",
+        "seed": 1011,
+        "is_active": True,
+    },
+    "network_failure_step1": {
+        "id": "network_failure_step1",
+        "name": "Network Connection Failure at Step 1",
+        "description": "Step 1 encounters socket reset (ECONNRESET) or connection abort. Expected recovery: Bounded Retry.",
+        "category": "network_failure",
+        "probability": 1.0,
+        "deterministic_step": 1,
+        "failure_delay_ms": 0,
+        "severity": "medium",
+        "seed": 1012,
         "is_active": True,
     },
 }

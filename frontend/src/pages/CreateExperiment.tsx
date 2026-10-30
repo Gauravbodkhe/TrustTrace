@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   FlaskConical,
   Play,
@@ -20,9 +20,10 @@ import {
   Sliders,
   Check,
   Zap,
+  BookmarkCheck,
 } from 'lucide-react';
 import { api } from '../services/api';
-import { Task, FaultScenario, RecoveryPolicy, ExperimentCreate } from '../types';
+import { Task, FaultScenario, RecoveryPolicy, ExperimentCreate, SampleTestCase } from '../types';
 import { VoiceMicButton } from '../voice/VoiceMicButton';
 
 interface PolicyCardInfo {
@@ -88,6 +89,7 @@ interface ScenarioCategoryGroup {
 
 export const CreateExperiment: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Wizard state: 1 to 6
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -96,6 +98,8 @@ export const CreateExperiment: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [scenarios, setScenarios] = useState<FaultScenario[]>([]);
   const [policies, setPolicies] = useState<RecoveryPolicy[]>([]);
+  const [sampleCases, setSampleCases] = useState<SampleTestCase[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,18 +133,48 @@ export const CreateExperiment: React.FC = () => {
   const [costBudget, setCostBudget] = useState<string>('');
   const [concurrencyLimit, setConcurrencyLimit] = useState<number>(1);
 
+  const applySampleCase = (tc: SampleTestCase) => {
+    setSelectedCaseId(tc.id);
+    setName(`${tc.name} (${tc.id})`);
+    setDescription(
+      `Evaluation of sample test case ${tc.id}: ${tc.name}. Expected recovery: ${tc.expected_recovery}. ${tc.description}`
+    );
+    setPolicyId(tc.recommended_policy_id);
+    setScenarioId(tc.scenario_id);
+    if (tc.task_ids && tc.task_ids.length > 0) {
+      setSelectedTaskIds(tc.task_ids);
+    }
+    const params = tc.default_params || {};
+    if (params.repetitions) setRepetitions(params.repetitions);
+    if (params.seed) setSeed(params.seed);
+    if (params.max_retries) setMaxRetries(params.max_retries);
+    if (params.timeout_seconds) setTimeoutSeconds(params.timeout_seconds);
+  };
+
   useEffect(() => {
     const loadPrerequisites = async () => {
       try {
         setLoading(true);
-        const [taskList, scenarioList, policyList] = await Promise.all([
+        const [taskList, scenarioList, policyList, caseList] = await Promise.all([
           api.tasks.list(),
           api.scenarios.list(),
           api.scenarios.listPolicies(),
+          api.testCases?.list ? api.testCases.list() : Promise.resolve([]),
         ]);
         setTasks(taskList);
         setScenarios(scenarioList);
         setPolicies(policyList);
+        setSampleCases(caseList);
+
+        // Check if navigated with a specific caseId query param
+        const urlCaseId = searchParams.get('caseId');
+        if (urlCaseId) {
+          const matched = caseList.find((c) => c.id.toLowerCase() === urlCaseId.toLowerCase());
+          if (matched) {
+            applySampleCase(matched);
+            return;
+          }
+        }
 
         if (taskList.length > 0) {
           setSelectedTaskIds(taskList.slice(0, 3).map((t) => t.id));
@@ -152,7 +186,7 @@ export const CreateExperiment: React.FC = () => {
       }
     };
     loadPrerequisites();
-  }, []);
+  }, [searchParams]);
 
   const handleToggleTask = (taskId: string) => {
     setSelectedTaskIds((prev) =>
@@ -324,6 +358,46 @@ export const CreateExperiment: React.FC = () => {
           Set up a test to see how the AI handles errors when its tools have problems.
         </p>
       </div>
+
+      {/* Preset Loader: Standard Sample Test Cases */}
+      {sampleCases.length > 0 && (
+        <div className="p-3.5 rounded-xl border border-indigo-200/80 dark:border-indigo-900/50 bg-indigo-50/40 dark:bg-indigo-950/20 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center space-x-2">
+            <BookmarkCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+            <div>
+              <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 block">
+                Load from Standard Sample Test Case
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Quickly fill settings with one of the 10 benchmark test cases to edit or duplicate:
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <select
+              value={selectedCaseId}
+              onChange={(e) => {
+                const c = sampleCases.find((sc) => sc.id === e.target.value);
+                if (c) applySampleCase(c);
+              }}
+              className="text-xs py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="">-- Choose Sample Case --</option>
+              {sampleCases.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.id}: {c.name} ({c.expected_recovery})
+                </option>
+              ))}
+            </select>
+            {selectedCaseId && (
+              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                Loaded!
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Wizard Progress Indicator */}
       <div className="bg-white dark:bg-[#0f1728] border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 shadow-xs">

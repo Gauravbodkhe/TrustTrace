@@ -4,9 +4,33 @@ export interface HealthStatus {
   status: string;
   version: string;
   database: string;
+  db_type?: string;
   gemini_available: boolean;
   mock_mode: boolean;
   timestamp: string;
+}
+
+export interface SampleTestCase {
+  id: string;
+  name: string;
+  description: string;
+  fault_category: string;
+  scenario_id: string;
+  expected_recovery: string;
+  recommended_policy_id: string;
+  task_ids: string[];
+  default_params: {
+    repetitions?: number;
+    seed?: number;
+    max_retries?: number;
+    timeout_seconds?: number;
+    token_budget?: number | null;
+    cost_budget_usd?: number | null;
+    [key: string]: any;
+  };
+  is_sample: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Task {
@@ -153,6 +177,8 @@ export interface MetricSummary {
 
 export interface DashboardStats {
   total_experiments: number;
+  completed_experiments?: number;
+  total_sample_cases?: number;
   total_runs: number;
   task_success_rate: number | null;
   recovery_success_rate: number | null;

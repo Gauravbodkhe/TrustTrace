@@ -48,6 +48,34 @@ export const api = {
     list: () => request<import('../types').Task[]>('/api/v1/exports/tasks/list'),
   },
 
+  // ─── Sample Test Cases ─────────────────────────────────────────────────────
+  testCases: {
+    list: (sampleOnly = false) =>
+      request<import('../types').SampleTestCase[]>(`/api/v1/test-cases${sampleOnly ? '?sample_only=true' : ''}`),
+    get: (id: string) => request<import('../types').SampleTestCase>(`/api/v1/test-cases/${id}`),
+    create: (data: Partial<import('../types').SampleTestCase>) =>
+      request<import('../types').SampleTestCase>('/api/v1/test-cases', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<import('../types').SampleTestCase>) =>
+      request<import('../types').SampleTestCase>(`/api/v1/test-cases/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    run: (id: string) =>
+      request<{
+        status: string;
+        case_id: string;
+        case_name: string;
+        expected_recovery: string;
+        experiment_id: string;
+        result: any;
+      }>(`/api/v1/test-cases/${id}/run`, {
+        method: 'POST',
+      }),
+  },
+
   // ─── Scenarios ────────────────────────────────────────────────────────────
   scenarios: {
     list: () => request<import('../types').FaultScenario[]>('/api/v1/scenarios'),

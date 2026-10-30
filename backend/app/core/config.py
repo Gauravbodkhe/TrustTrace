@@ -10,7 +10,11 @@ import os
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(__file__), "../../.env"),
+        env_file=(
+            os.path.join(os.path.dirname(__file__), "../../../.env"),
+            os.path.join(os.path.dirname(__file__), "../../.env"),
+            ".env",
+        ),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -21,7 +25,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     LOG_LEVEL: str = "INFO"
 
-    # Database (SQLite default for local development)
+    # Database (SQLite default for local development, Supabase PostgreSQL for production)
     DATABASE_URL: str = "sqlite:///./trusttrace.db"
 
     # Supabase (optional)
@@ -44,6 +48,10 @@ class Settings(BaseSettings):
     @property
     def is_development(self) -> bool:
         return self.APP_ENV == "development"
+
+    @property
+    def is_postgres(self) -> bool:
+        return "postgresql" in self.DATABASE_URL or self.DATABASE_URL.startswith("postgres://")
 
     @property
     def gemini_available(self) -> bool:

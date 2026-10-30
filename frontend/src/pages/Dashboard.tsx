@@ -18,6 +18,10 @@ import {
   Mic,
   ShieldAlert,
   Sparkles,
+  FlaskConical,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -30,7 +34,7 @@ import {
   Legend,
 } from 'recharts';
 import { api } from '../services/api';
-import { DashboardStats, PolicyComparisonResponse } from '../types';
+import { DashboardStats, PolicyComparisonResponse, SampleTestCase } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
@@ -41,6 +45,9 @@ export const Dashboard: React.FC = () => {
   const { chartTheme, resolvedTheme } = useTheme();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [comparison, setComparison] = useState<PolicyComparisonResponse | null>(null);
+  const [sampleCases, setSampleCases] = useState<SampleTestCase[]>([]);
+  const [runningCaseId, setRunningCaseId] = useState<string | null>(null);
+  const [caseSuccessMsg, setCaseSuccessMsg] = useState<{ id: string; expId: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,16 +57,33 @@ export const Dashboard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, compData] = await Promise.all([
+      const [statsData, compData, casesData] = await Promise.all([
         api.metrics.dashboard(),
         api.metrics.comparison(),
+        api.testCases?.list ? api.testCases.list() : Promise.resolve([]),
       ]);
       setStats(statsData);
       setComparison(compData);
+      setSampleCases(casesData);
     } catch (err: any) {
       setError(err?.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRunSampleCase = async (caseId: string) => {
+    try {
+      setRunningCaseId(caseId);
+      setError(null);
+      setCaseSuccessMsg(null);
+      const res = await api.testCases.run(caseId);
+      setCaseSuccessMsg({ id: caseId, expId: res.experiment_id });
+      await fetchData();
+    } catch (err: any) {
+      setError(err?.message || `Failed to run sample test case ${caseId}`);
+    } finally {
+      setRunningCaseId(null);
     }
   };
 
@@ -233,10 +257,10 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Total Tests"
-          value={stats?.total_experiments ?? 0}
+          value={stats?.completed_experiments ?? stats?.total_experiments ?? 0}
           icon={Layers}
           accentColor="slate"
-          subtext="Total number of tests created and run"
+          subtext="Total completed test runs in permanent database"
         />
 
         <MetricCard
@@ -600,6 +624,115 @@ export const Dashboard: React.FC = () => {
                 View All Test Problems &rarr;
               </NavLink>
             </div>
+          </div>
+        </div>
+
+        {/* Section: Standard Sample Test Cases */}
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0f1728] shadow-xs overflow-hidden">
+          <div className="p-4 sm:px-5 sm:py-4 border-b border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-slate-50 to-indigo-50/20 dark:from-slate-900/50 dark:to-indigo-950/10">
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="p-1 rounded-md bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400">
+                  <FlaskConical className="h-4 w-4" />
+                </span>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  Standard Sample Test Cases
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">
+                  {sampleCases.length} Benchmarks
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Controlled test cases with defined failure modes and expected recovery strategies. Run instantly or duplicate into the wizard.
+              </p>
+            </div>
+
+            <NavLink
+              to="/experiments/new"
+              className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center space-x-1"
+            >
+              <span>Create Custom Test</span>
+              <ArrowRight className="h-3 w-3" />
+            </NavLink>
+          </div>
+
+          {caseSuccessMsg && (
+            <div className="m-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-200 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span>
+                  Test case <strong>{caseSuccessMsg.id}</strong> executed successfully! Real execution trace and metrics saved to database.
+                </span>
+              </div>
+              <NavLink
+                to={`/experiments/${caseSuccessMsg.expId}`}
+                className="font-semibold text-emerald-700 dark:text-emerald-300 hover:underline flex items-center space-x-1"
+              >
+                <span>View Results</span>
+                <ExternalLink className="h-3 w-3" />
+              </NavLink>
+            </div>
+          )}
+
+          <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {sampleCases.map((tc) => {
+              const isRunning = runningCaseId === tc.id;
+              return (
+                <div
+                  key={tc.id}
+                  className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:border-indigo-200 dark:hover:border-indigo-900/60 transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-0.5 rounded font-mono text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                          {tc.id}
+                        </span>
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                          {tc.name}
+                        </h3>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 whitespace-nowrap">
+                        Expected: {tc.expected_recovery}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3">
+                      {tc.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mb-3 font-mono">
+                      <span className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        Fault: {tc.fault_category}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        Policy: {tc.recommended_policy_id.replace('policy_', '')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => navigate(`/experiments/new?caseId=${tc.id}`)}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors flex items-center space-x-1"
+                      title="Open in wizard to customize or duplicate"
+                    >
+                      <Copy className="h-3 w-3" />
+                      <span>Customize</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleRunSampleCase(tc.id)}
+                      disabled={isRunning || Boolean(runningCaseId)}
+                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-medium transition-colors shadow-2xs flex items-center space-x-1.5"
+                    >
+                      <Play className={`h-3 w-3 ${isRunning ? 'animate-spin' : ''}`} />
+                      <span>{isRunning ? 'Running...' : 'Run Test'}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

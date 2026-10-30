@@ -14,6 +14,7 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     database: str
+    db_type: Optional[str] = "sqlite"
     gemini_available: bool
     mock_mode: bool
     timestamp: datetime
@@ -238,3 +239,47 @@ class ExportMetadata(BaseModel):
     generated_at: datetime
     run_count: int
     note: str = "Export contains only recorded run data. No fabricated results."
+
+
+# ─────────────────────────── Sample Test Cases ─────────────────────────────
+
+class SampleTestCaseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    description: str
+    fault_category: str
+    scenario_id: str
+    expected_recovery: str
+    recommended_policy_id: str
+    task_ids: List[str]
+    default_params: Dict[str, Any] = Field(default_factory=dict)
+    is_sample: bool = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class SampleTestCaseCreate(BaseModel):
+    id: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=200)
+    description: str = Field("", max_length=2000)
+    fault_category: str
+    scenario_id: str
+    expected_recovery: str
+    recommended_policy_id: str
+    task_ids: List[str] = Field(default_factory=list)
+    default_params: Dict[str, Any] = Field(default_factory=dict)
+    is_sample: bool = False
+
+
+class SampleTestCaseUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    fault_category: Optional[str] = None
+    scenario_id: Optional[str] = None
+    expected_recovery: Optional[str] = None
+    recommended_policy_id: Optional[str] = None
+    task_ids: Optional[List[str]] = None
+    default_params: Optional[Dict[str, Any]] = None
+

@@ -92,6 +92,7 @@ TRANSIENT_CATEGORIES = {
     FaultCategory.TRANSIENT_ERROR.value,
     FaultCategory.RATE_LIMIT.value,
     FaultCategory.TIMEOUT.value,
+    FaultCategory.NETWORK_FAILURE.value,
 }
 
 # Categories where retrying is unsafe or unlikely to help
@@ -99,6 +100,7 @@ NON_RETRYABLE_CATEGORIES = {
     FaultCategory.INVALID_ARGUMENTS.value,
     FaultCategory.MALFORMED_JSON.value,
     FaultCategory.SCHEMA_VALIDATION.value,
+    FaultCategory.AUTH_FAILURE.value,
 }
 
 
@@ -284,6 +286,7 @@ _UNSAFE_CATEGORIES = {
     FaultCategory.INVALID_ARGUMENTS.value,
     FaultCategory.SCHEMA_VALIDATION.value,
     FaultCategory.MALFORMED_JSON.value,
+    FaultCategory.AUTH_FAILURE.value,
 }
 
 
