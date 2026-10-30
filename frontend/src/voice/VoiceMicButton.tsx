@@ -15,11 +15,7 @@ export const VoiceMicButton: React.FC<VoiceMicButtonProps> = ({
   className = '',
   size = 'md',
 }) => {
-  const { isSupported, isListening, startListening, stopListening, error } = useVoiceRecognition(
-    (capturedText) => {
-      onTranscript(capturedText);
-    }
-  );
+  const { isSupported, isListening, startListening, stopListening, error } = useVoiceRecognition(onTranscript);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,7 +32,7 @@ export const VoiceMicButton: React.FC<VoiceMicButtonProps> = ({
       <button
         type="button"
         disabled
-        title="Voice typing not supported in this browser"
+        title="Voice speech recognition not supported in this browser (use Chrome or Edge)"
         className={`p-1.5 rounded-md text-slate-300 dark:text-slate-600 cursor-not-allowed ${className}`}
       >
         <MicOff className="h-3.5 w-3.5" />
@@ -44,25 +40,43 @@ export const VoiceMicButton: React.FC<VoiceMicButtonProps> = ({
     );
   }
 
+  const sizeClasses =
+    size === 'sm'
+      ? 'p-1 text-xs'
+      : size === 'lg'
+      ? 'p-2 text-sm'
+      : 'p-1.5 text-xs';
+
+  const iconSizes =
+    size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
+
   return (
     <div className="relative inline-flex items-center">
       <button
         type="button"
         onClick={handleClick}
-        title={isListening ? 'Listening... click to stop' : title}
-        className={`p-1.5 rounded-md transition-all ${
+        title={error || (isListening ? 'Listening... click to stop' : title)}
+        aria-label={isListening ? 'Stop voice recording' : 'Start voice recording'}
+        className={`rounded-lg border transition-all flex items-center justify-center ${sizeClasses} ${
           isListening
-            ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/80 dark:text-rose-400 border border-rose-300 dark:border-rose-800 animate-pulse'
-            : 'text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            ? 'bg-rose-50 border-rose-400 text-rose-600 dark:bg-rose-950/60 dark:border-rose-700 dark:text-rose-300 animate-pulse ring-2 ring-rose-400/30'
+            : error
+            ? 'bg-amber-50 border-amber-300 text-amber-600 dark:bg-amber-950/40 dark:border-amber-700'
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 shadow-2xs'
         } ${className}`}
       >
-        <Mic className={`h-3.5 w-3.5 ${isListening ? 'animate-bounce' : ''}`} />
+        {isListening ? (
+          <Mic className={`${iconSizes} text-rose-600 animate-bounce`} />
+        ) : (
+          <Mic className={iconSizes} />
+        )}
       </button>
-      {error && (
-        <span
-          className="absolute bottom-full mb-1 right-0 w-48 p-1.5 bg-rose-900 text-rose-100 text-[10px] rounded shadow-lg z-50 pointer-events-none"
-        >
-          {error}
+
+      {/* Pulsing indicator when active */}
+      {isListening && (
+        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
         </span>
       )}
     </div>

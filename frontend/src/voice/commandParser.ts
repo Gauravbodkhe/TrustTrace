@@ -13,6 +13,7 @@ export type VoiceIntent =
   | 'EXPLAIN_FAILURE'
   | 'GENERATE_REPORT'
   | 'SUMMARIZE_RESULTS'
+  | 'RUN_BENCHMARK'
   | 'UNKNOWN';
 
 export interface ParsedVoiceCommand {
@@ -27,7 +28,24 @@ export interface ParsedVoiceCommand {
 export const parseVoiceCommand = (raw: string): ParsedVoiceCommand => {
   const normalized = raw.trim().toLowerCase();
 
-  // 1. "Create a new experiment"
+  // 1. "Quick benchmark" / "Run benchmark"
+  if (
+    normalized.includes('quick benchmark') ||
+    normalized.includes('run benchmark') ||
+    normalized.includes('run quick benchmark') ||
+    normalized.includes('start benchmark') ||
+    normalized.includes('execute benchmark')
+  ) {
+    return {
+      rawTranscript: raw,
+      intent: 'RUN_BENCHMARK',
+      confidence: 0.95,
+      description: 'Execute automated benchmark evaluation test',
+      requiresConfirmation: false,
+    };
+  }
+
+  // 2. "Create a new experiment"
   if (
     normalized.includes('create a new experiment') ||
     normalized.includes('new experiment') ||

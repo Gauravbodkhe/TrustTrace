@@ -15,6 +15,7 @@ export const useSpeechSynthesis = (): UseSpeechSynthesisReturn => {
   const [isPaused, setIsPaused] = useState(false);
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (isSupported) {
@@ -23,7 +24,6 @@ export const useSpeechSynthesis = (): UseSpeechSynthesisReturn => {
   }, [isSupported]);
 
   const stripSensitiveText = (raw: string): string => {
-    // Strip raw bearer tokens, hex hashes, or secret patterns before speaking aloud
     return raw
       .replace(/Bearer\s+[A-Za-z0-9_\-\.]{10,}/gi, 'token redacted')
       .replace(/sk-[A-Za-z0-9_\-]{20,}/g, 'API key redacted')
@@ -31,53 +31,73 @@ export const useSpeechSynthesis = (): UseSpeechSynthesisReturn => {
       .replace(/[a-f0-9]{32,64}/gi, 'identifier');
   };
 
-  const speak = useCallback((text: string) => {
-    if (!isSupported || !synthRef.current) return;
+  const speak = useCallback(
+    (text: string) => {
+      if (!isSupported) return;
+      const synth = synthRef.current || (typeof window !== 'undefined' ? window.speechSynthesis : null);
+      if (!synth) return;
 
-    synthRef.current.cancel();
+      try {
+        synth.cancel();
 
-    const sanitized = stripSensitiveText(text);
-    const utterance = new SpeechSynthesisUtterance(sanitized);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+        const sanitized = stripSensitiveText(text);
+        const utterance = new SpeechSynthesisUtterance(sanitized);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
 
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-    };
+        // Retain utterance in ref so Chromium doesn't garbage collect mid-speech
+        utteranceRef.current = utterance;
 
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
+        utterance.onstart = () => {
+          setIsPlaying(true);
+          setIsPaused(false);
+        };
 
-    utterance.onerror = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
+        utterance.onend = () => {
+          setIsPlaying(false);
+          setIsPaused(false);
+          utteranceRef.current = null;
+        };
 
-    synthRef.current.speak(utterance);
-  }, [isSupported]);
+        utterance.onerror = () => {
+          setIsPlaying(false);
+          setIsPaused(false);
+          utteranceRef.current = null;
+        };
+
+        synth.speak(utterance);
+      } catch (e) {
+        console.warn('Speech synthesis error:', e);
+        setIsPlaying(false);
+        setIsPaused(false);
+      }
+    },
+    [isSupported]
+  );
 
   const pause = useCallback(() => {
-    if (synthRef.current && isPlaying && !isPaused) {
-      synthRef.current.pause();
+    const synth = synthRef.current || (typeof window !== 'undefined' ? window.speechSynthesis : null);
+    if (synth && isPlaying && !isPaused) {
+      synth.pause();
       setIsPaused(true);
     }
   }, [isPlaying, isPaused]);
 
   const resume = useCallback(() => {
-    if (synthRef.current && isPlaying && isPaused) {
-      synthRef.current.resume();
+    const synth = synthRef.current || (typeof window !== 'undefined' ? window.speechSynthesis : null);
+    if (synth && isPlaying && isPaused) {
+      synth.resume();
       setIsPaused(false);
     }
   }, [isPlaying, isPaused]);
 
   const stop = useCallback(() => {
-    if (synthRef.current) {
-      synthRef.current.cancel();
+    const synth = synthRef.current || (typeof window !== 'undefined' ? window.speechSynthesis : null);
+    if (synth) {
+      synth.cancel();
       setIsPlaying(false);
       setIsPaused(false);
+      utteranceRef.current = null;
     }
   }, []);
 

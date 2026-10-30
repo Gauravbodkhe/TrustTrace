@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mic,
   MicOff,
   X,
   Volume2,
-  VolumeX,
   Play,
   Pause,
   Square,
@@ -14,6 +13,8 @@ import {
   HelpCircle,
   Sparkles,
   ArrowRight,
+  Send,
+  Info,
 } from 'lucide-react';
 import { useVoiceRecognition } from './useVoiceRecognition';
 import { useSpeechSynthesis } from './useSpeechSynthesis';
@@ -38,24 +39,26 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
   const [parsedCommand, setParsedCommand] = useState<ParsedVoiceCommand | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [speakingText, setSpeakingText] = useState<string | null>(null);
+  const [isExecuting, setIsExecuting] = useState(false);
+
+  const handleSpeechResult = useCallback((finalText: string) => {
+    setEditableText(finalText);
+    const cmd = parseVoiceCommand(finalText);
+    setParsedCommand(cmd);
+  }, []);
 
   const {
     isSupported: isSpeechSupported,
     isListening,
-    transcript,
     interimTranscript,
     error: micError,
     startListening,
     stopListening,
     resetTranscript,
-  } = useVoiceRecognition((finalText) => {
-    setEditableText(finalText);
-    const cmd = parseVoiceCommand(finalText);
-    setParsedCommand(cmd);
-  });
+  } = useVoiceRecognition(handleSpeechResult);
 
   const {
-    isSupported: isTtsSupported,
+    isSupported: _isTtsSupported,
     isPlaying: isTtsPlaying,
     isPaused: isTtsPaused,
     speak,
@@ -64,7 +67,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
     stop,
   } = useSpeechSynthesis();
 
-  // Reset state when opening
+  // Reset state when opening/closing
   useEffect(() => {
     if (isOpen) {
       setEditableText('');
@@ -72,14 +75,11 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
       setActionNotice(null);
       setSpeakingText(null);
       resetTranscript();
-      if (isSpeechSupported) {
-        startListening();
-      }
     } else {
       stopListening();
       stop();
     }
-  }, [isOpen]);
+  }, [isOpen, resetTranscript, stopListening, stop]);
 
   // Update command parse if user manually edits text
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,101 +88,160 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
     setParsedCommand(parseVoiceCommand(val));
   };
 
-  const handleExecuteCommand = async () => {
-    if (!parsedCommand) return;
-    setActionNotice(null);
+  const handleApplyPreset = (commandText: string) => {
+    setEditableText(commandText);
+    const cmd = parseVoiceCommand(commandText);
+    setParsedCommand(cmd);
+  };
 
-    switch (parsedCommand.intent) {
-      case 'NAVIGATE_DASHBOARD':
-        navigate('/');
-        onClose();
-        break;
-      case 'NAVIGATE_NEW_EXPERIMENT':
-        navigate('/experiments/new');
-        onClose();
-        break;
-      case 'NAVIGATE_EXPERIMENTS':
-        navigate('/experiments');
-        onClose();
-        break;
-      case 'NAVIGATE_COMPARISON':
-        navigate('/comparison');
-        onClose();
-        break;
-      case 'NAVIGATE_TRACES':
-        navigate('/traces');
-        onClose();
-        break;
-      case 'NAVIGATE_EVIDENCE':
-      case 'EXPLAIN_FAILURE':
-        navigate('/evidence');
-        onClose();
-        break;
-      case 'NAVIGATE_REPORTS':
-      case 'GENERATE_REPORT':
-        navigate('/reports');
-        onClose();
-        break;
-      case 'NAVIGATE_SETTINGS':
-        navigate('/settings');
-        onClose();
-        break;
-      case 'SELECT_POLICY':
-        if (parsedCommand.parameter) {
-          if (onSelectPolicy) {
-            onSelectPolicy(parsedCommand.parameter);
-            setActionNotice(`Selected strategy: ${parsedCommand.parameter}`);
-          } else {
-            navigate(`/experiments/new?policy=${parsedCommand.parameter}`);
-            onClose();
-          }
-        }
-        break;
-      case 'SELECT_SCENARIO':
-        if (parsedCommand.parameter) {
-          if (onSelectScenario) {
-            onSelectScenario(parsedCommand.parameter);
-            setActionNotice(`Selected scenario: ${parsedCommand.parameter}`);
-          } else {
-            navigate(`/experiments/new?scenario=${parsedCommand.parameter}`);
-            onClose();
-          }
-        }
-        break;
-      case 'SHOW_LATEST_EXPERIMENT':
-        try {
-          const list = await api.experiments.list(1, 0);
-          if (list && list.length > 0) {
-            navigate(`/experiments/${list[0].id}`);
-            onClose();
-          } else {
-            setActionNotice('No experiments found. Create one first!');
-          }
-        } catch {
+  const handleExecuteCommand = async () => {
+    if (!parsedCommand || parsedCommand.intent === 'UNKNOWN') return;
+    setActionNotice(null);
+    setIsExecuting(true);
+
+    try {
+      switch (parsedCommand.intent) {
+        case 'NAVIGATE_DASHBOARD':
+          navigate('/');
+          onClose();
+          break;
+
+        case 'NAVIGATE_NEW_EXPERIMENT':
+          navigate('/experiments/new');
+          onClose();
+          break;
+
+        case 'NAVIGATE_EXPERIMENTS':
           navigate('/experiments');
           onClose();
+          break;
+
+        case 'NAVIGATE_COMPARISON':
+          navigate('/comparison');
+          onClose();
+          break;
+
+        case 'NAVIGATE_TRACES':
+          navigate('/traces');
+          onClose();
+          break;
+
+        case 'NAVIGATE_EVIDENCE':
+        case 'EXPLAIN_FAILURE':
+          navigate('/evidence');
+          onClose();
+          break;
+
+        case 'NAVIGATE_REPORTS':
+        case 'GENERATE_REPORT':
+          navigate('/reports');
+          onClose();
+          break;
+
+        case 'NAVIGATE_SETTINGS':
+          navigate('/settings');
+          onClose();
+          break;
+
+        case 'RUN_BENCHMARK': {
+          setActionNotice('Executing automated benchmark evaluation...');
+          const exp = await api.experiments.create({
+            name: 'Voice Benchmark: Fault Recovery Evaluation',
+            description: 'Triggered via voice command assistant.',
+            agent_type: 'mock',
+            policy_id: 'policy_g_budget_aware',
+            scenario_id: 'transient_error_step1',
+            task_ids: ['task_expense_policy', 'task_order_lookup'],
+            repetitions: 1,
+            seed: 42,
+            max_retries: 3,
+            timeout_seconds: 30,
+            token_budget: 2000,
+            cost_budget_usd: null,
+          });
+          await api.experiments.run(exp.id);
+          setActionNotice('Benchmark completed! Opening results...');
+          navigate(`/experiments/${exp.id}`);
+          onClose();
+          break;
         }
-        break;
-      case 'SUMMARIZE_RESULTS':
-        try {
-          const stats = await api.metrics.dashboard();
-          const summaryMsg = `TrustTrace has recorded ${stats.total_runs} runs across ${stats.total_experiments} experiments. The overall task success rate is ${stats.task_success_rate !== null ? (stats.task_success_rate * 100).toFixed(0) : '0'} percent. Recovery Policy G demonstrates robust dynamic recovery under budget constraints.`;
-          setSpeakingText(summaryMsg);
-          speak(summaryMsg);
-        } catch {
-          setActionNotice('Could not load summary telemetry.');
-        }
-        break;
-      default:
-        setActionNotice('Could not map speech to a recognized action.');
+
+        case 'SELECT_POLICY':
+          if (parsedCommand.parameter) {
+            if (onSelectPolicy) {
+              onSelectPolicy(parsedCommand.parameter);
+              setActionNotice(`Selected strategy: ${parsedCommand.parameter}`);
+            } else {
+              navigate(`/experiments/new?policy=${parsedCommand.parameter}`);
+              onClose();
+            }
+          }
+          break;
+
+        case 'SELECT_SCENARIO':
+          if (parsedCommand.parameter) {
+            if (onSelectScenario) {
+              onSelectScenario(parsedCommand.parameter);
+              setActionNotice(`Selected scenario: ${parsedCommand.parameter}`);
+            } else {
+              navigate(`/experiments/new?scenario=${parsedCommand.parameter}`);
+              onClose();
+            }
+          }
+          break;
+
+        case 'SHOW_LATEST_EXPERIMENT':
+          try {
+            const list = await api.experiments.list(1, 0);
+            if (list && list.length > 0) {
+              navigate(`/experiments/${list[0].id}`);
+              onClose();
+            } else {
+              setActionNotice('No experiments found. Create one first!');
+            }
+          } catch {
+            navigate('/experiments');
+            onClose();
+          }
+          break;
+
+        case 'SUMMARIZE_RESULTS':
+          try {
+            const stats = await api.metrics.dashboard();
+            const summaryMsg = `TrustTrace has recorded ${stats.total_runs} runs across ${stats.total_experiments} experiments. The overall task success rate is ${
+              stats.task_success_rate !== null ? (stats.task_success_rate * 100).toFixed(0) : '0'
+            } percent. Recovery Policy G demonstrates robust dynamic recovery under budget constraints.`;
+            setSpeakingText(summaryMsg);
+            speak(summaryMsg);
+          } catch {
+            setActionNotice('Could not load summary telemetry.');
+          }
+          break;
+
+        default:
+          setActionNotice('Could not map speech to a recognized action.');
+      }
+    } finally {
+      setIsExecuting(false);
     }
   };
+
+  const sampleCommands = [
+    { label: 'Compare all recovery policies', text: 'Compare all recovery policies' },
+    { label: 'Create a new experiment', text: 'Create a new experiment' },
+    { label: 'Quick benchmark evaluation', text: 'Run quick benchmark' },
+    { label: 'Explain why this run failed', text: 'Explain why this run failed' },
+    { label: 'Generate the overall PDF report', text: 'Generate the overall PDF report' },
+    { label: 'Summarize experimental results', text: 'Summarize the experimental results' },
+    { label: 'View Trace Explorer', text: 'Show traces' },
+    { label: 'Open Settings', text: 'Open settings' },
+  ];
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="w-full max-w-lg bg-white dark:bg-[#0f1728] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-lg bg-white dark:bg-[#0f1728] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
@@ -194,7 +253,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
                 TrustTrace Voice Assistant
               </h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Speak commands or dictate notes naturally
+                Speak voice commands or click quick actions
               </p>
             </div>
           </div>
@@ -202,6 +261,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Close Assistant"
           >
             <X className="h-4 w-4" />
           </button>
@@ -209,8 +269,8 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
 
         {/* Body */}
         <div className="p-5 space-y-4">
-          {/* Listening Indicator / Wave animation */}
-          <div className="flex flex-col items-center justify-center py-4 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800">
+          {/* Listening Indicator / Large Mic Button */}
+          <div className="flex flex-col items-center justify-center py-5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800">
             <div className="relative">
               {isListening && (
                 <div className="absolute inset-0 rounded-full bg-indigo-400/30 dark:bg-indigo-500/20 animate-ping" />
@@ -218,18 +278,21 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
               <button
                 type="button"
                 onClick={isListening ? stopListening : startListening}
-                className={`relative z-10 w-14 h-14 rounded-full flex items-center justify-center shadow-md transition-all ${
+                className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 ${
                   isListening
-                    ? 'bg-rose-600 text-white hover:bg-rose-700'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    ? 'bg-rose-600 text-white ring-4 ring-rose-200 dark:ring-rose-950/60'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
                 }`}
+                title={isListening ? 'Click to stop listening' : 'Click to start speaking'}
               >
-                {isListening ? <Mic className="h-6 w-6 animate-pulse" /> : <MicOff className="h-6 w-6" />}
+                {isListening ? <Mic className="h-7 w-7 animate-pulse" /> : <Mic className="h-7 w-7" />}
               </button>
             </div>
 
-            <span className="mt-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              {isListening ? 'Listening for command...' : 'Microphone idle. Click button to speak.'}
+            <span className="mt-3.5 text-xs font-semibold text-slate-800 dark:text-slate-200">
+              {isListening
+                ? 'Listening... Speak your command clearly'
+                : 'Microphone Idle. Click the microphone to speak'}
             </span>
 
             {interimTranscript && (
@@ -239,32 +302,64 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
             )}
           </div>
 
+          {/* Browser / Mic notices */}
           {micError && (
-            <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-500" />
-              <span>{micError}</span>
+            <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-start space-x-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-500 mt-0.5" />
+              <div>
+                <p className="font-semibold">Microphone Notice</p>
+                <p className="mt-0.5 leading-relaxed">{micError}</p>
+              </div>
             </div>
           )}
 
-          {/* Editable Transcript Field */}
+          {!isSpeechSupported && !micError && (
+            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 text-xs flex items-start space-x-2">
+              <Info className="h-4 w-4 flex-shrink-0 text-amber-600 mt-0.5" />
+              <div>
+                <p className="font-semibold">Browser Voice Input Note</p>
+                <p className="mt-0.5 leading-relaxed">
+                  Web Speech recognition works best in Chrome and Edge. You can also click any preset action or type your command below.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Command Input & Execution */}
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Recognized Speech (You can edit before executing):
+              Voice Command / Text Input:
             </label>
-            <div className="relative">
+            <div className="flex items-center space-x-2">
               <input
                 type="text"
                 value={editableText}
                 onChange={handleTextChange}
-                placeholder='e.g., "Create a new experiment", "Compare all recovery policies", "Generate overall PDF"'
-                className="w-full px-3.5 py-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleExecuteCommand();
+                  }
+                }}
+                placeholder='e.g. "Compare all recovery policies", "New experiment", "Quick benchmark"'
+                className="flex-1 px-3.5 py-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 font-sans"
               />
+              <button
+                type="button"
+                onClick={handleExecuteCommand}
+                disabled={isExecuting || !parsedCommand || parsedCommand.intent === 'UNKNOWN'}
+                className="px-3.5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-2xs"
+                title="Execute Command"
+              >
+                <span>{isExecuting ? 'Running...' : 'Execute'}</span>
+                <Send className="h-3 w-3" />
+              </button>
             </div>
           </div>
 
           {/* Parsed Command Action Card */}
           {parsedCommand && parsedCommand.intent !== 'UNKNOWN' && (
-            <div className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/30 flex items-center justify-between text-xs">
+            <div className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/30 flex items-center justify-between text-xs animate-in fade-in duration-200">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-mono uppercase font-bold text-indigo-700 dark:text-indigo-400">
                   Detected Intent: {parsedCommand.intent}
@@ -277,17 +372,18 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
               <button
                 type="button"
                 onClick={handleExecuteCommand}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors shadow-2xs"
+                disabled={isExecuting}
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors shadow-2xs text-xs"
               >
-                <span>Execute</span>
+                <span>Run</span>
                 <ArrowRight className="h-3 w-3" />
               </button>
             </div>
           )}
 
           {actionNotice && (
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center space-x-1.5">
-              <Check className="h-3.5 w-3.5 text-emerald-600" />
+            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center space-x-1.5 animate-in fade-in duration-150">
+              <Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
               <span>{actionNotice}</span>
             </div>
           )}
@@ -298,7 +394,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
                   <Volume2 className="h-3.5 w-3.5 text-indigo-600" />
-                  <span>Voice Summary Playback</span>
+                  <span>Speech Synthesizer Playback</span>
                 </span>
 
                 <div className="flex items-center space-x-1.5">
@@ -334,16 +430,26 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
             </div>
           )}
 
-          {/* Sample Voice Commands Helper */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
-            <span className="font-semibold text-slate-700 dark:text-slate-300">Try saying:</span>
-            <div className="grid grid-cols-2 gap-1 text-[10px]">
-              <div>• "Create a new experiment"</div>
-              <div>• "Compare all recovery policies"</div>
-              <div>• "Explain why this run failed"</div>
-              <div>• "Generate the overall PDF report"</div>
-              <div>• "Summarize the experimental results"</div>
-              <div>• "Choose the timeout fault scenario"</div>
+          {/* Clickable Quick Action Presets */}
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                Click or speak a command:
+              </span>
+              <span className="text-slate-400 text-[10px]">Tap to test command</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {sampleCommands.map((cmd) => (
+                <button
+                  key={cmd.text}
+                  type="button"
+                  onClick={() => handleApplyPreset(cmd.text)}
+                  className="text-left px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-slate-50/60 dark:bg-slate-900/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40 text-[11px] text-slate-700 dark:text-slate-300 transition-colors truncate"
+                  title={cmd.text}
+                >
+                  • {cmd.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
