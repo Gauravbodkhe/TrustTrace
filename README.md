@@ -3,6 +3,8 @@
 **AI Agent Reliability Testing and Recovery Platform**  
 *A controlled empirical benchmark for evaluating failure recovery in tool-using AI agents.*
 
+🚀 Live Demo: https://trust-trace-lime.vercel.app/
+
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![React 18](https://img.shields.io/badge/react-18-61dafb.svg)](https://reactjs.org/)
@@ -13,6 +15,14 @@
 [![Vector PDF](https://img.shields.io/badge/PDF%20Engine-ReportLab-red.svg)]()
 [![Voice Assistant](https://img.shields.io/badge/Voice-Web%20Speech%20API-indigo.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 🌐 Live Deployment
+
+- Frontend: https://trust-trace-lime.vercel.app/
+- Backend API: https://trusttrace-152v.onrender.com/
+- API Documentation: https://trusttrace-152v.onrender.com/docs
 
 ---
 
