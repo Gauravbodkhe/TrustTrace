@@ -51,6 +51,12 @@ frontend/node_modules/
 *.swp
 *.swo
 
+# Testing
+test-results/
+playwright-report/
+frontend/test-results/
+frontend/playwright-report/
+
 # OS
 .DS_Store
 Thumbs.db

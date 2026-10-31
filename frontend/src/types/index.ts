@@ -1,5 +1,20 @@
 // TrustTrace Frontend Type Definitions
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
 export interface HealthStatus {
   status: string;
   version: string;
@@ -64,6 +79,7 @@ export interface RecoveryPolicy {
 
 export interface ExperimentCreate {
   name: string;
+  hypothesis?: string;
   description: string;
   agent_type: 'mock' | 'gemini';
   policy_id: string;
@@ -80,6 +96,7 @@ export interface ExperimentCreate {
 export interface Experiment {
   id: string;
   name: string;
+  hypothesis?: string;
   description: string;
   agent_type: string;
   policy_id: string;
@@ -178,7 +195,10 @@ export interface MetricSummary {
 export interface DashboardStats {
   total_experiments: number;
   completed_experiments?: number;
+  successful_experiments?: number;
+  failed_experiments?: number;
   total_sample_cases?: number;
+  total_retries?: number;
   total_runs: number;
   task_success_rate: number | null;
   recovery_success_rate: number | null;

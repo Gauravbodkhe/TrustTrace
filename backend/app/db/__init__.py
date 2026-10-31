@@ -84,11 +84,29 @@ def init_db() -> None:
     Create all tables idempotently (never drops or recreates existing tables).
     Preserves all existing experiments, traces, runs, and sample cases.
     """
+    from sqlalchemy import inspect
+
     if not is_postgres:
         with engine.connect() as conn:
             conn.execute(text("PRAGMA journal_mode=WAL"))
             conn.commit()
+
     Base.metadata.create_all(engine)
+
+    # Ensure schema backward compatibility (add newly introduced columns if missing)
+    try:
+        with engine.connect() as conn:
+            inspector = inspect(conn)
+            table_names = inspector.get_table_names()
+            if "experiments" in table_names:
+                exp_cols = [c["name"] for c in inspector.get_columns("experiments")]
+                if "hypothesis" not in exp_cols:
+                    conn.execute(text("ALTER TABLE experiments ADD COLUMN hypothesis TEXT DEFAULT ''"))
+                    conn.commit()
+                    logger.info("Migrated experiments table: added hypothesis column")
+    except Exception as e:
+        logger.warning("Schema compatibility check: %s", e)
+
     logger.info("Database tables initialized on %s (permanent persistence ready)", get_db_type().upper())
 
 

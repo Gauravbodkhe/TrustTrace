@@ -55,6 +55,7 @@ class Experiment(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     name: Mapped[str] = mapped_column(String(300), nullable=False)
+    hypothesis: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default="")
     description: Mapped[str] = mapped_column(Text, default="")
     agent_type: Mapped[str] = mapped_column(String(20), default="mock")
     policy_id: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -176,4 +177,17 @@ class SampleTestCase(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     scenario: Mapped[FaultScenario] = relationship("FaultScenario")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(100), default="Researcher")
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(String(20), default="researcher")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
 

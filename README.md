@@ -5,13 +5,14 @@
 
 🚀 Live Demo: https://trust-trace-lime.vercel.app/
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
-[![React 18](https://img.shields.io/badge/react-18-61dafb.svg)](https://reactjs.org/)
+[![React 19](https://img.shields.io/badge/react-19-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/backend%20tests-106%20passed-emerald.svg)]()
-[![Frontend Tests](https://img.shields.io/badge/frontend%20tests-8%20passed-emerald.svg)]()
+[![Tests](https://img.shields.io/badge/backend%20tests-93%20passed-emerald.svg)]()
+[![Frontend Tests](https://img.shields.io/badge/frontend%20tests-9%20passed-emerald.svg)]()
+[![E2E Tests](https://img.shields.io/badge/E2E-Playwright-orange.svg)]()
 [![Vector PDF](https://img.shields.io/badge/PDF%20Engine-ReportLab-red.svg)]()
 [![Voice Assistant](https://img.shields.io/badge/Voice-Web%20Speech%20API-indigo.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -231,22 +232,30 @@ Open `http://localhost:5173` in your browser.
 ### Backend Unit & Integration Tests (Pytest)
 ```powershell
 cd D:\TrustTrace\backend
-python -m pytest tests/test_backend.py -v
+python -m pytest
 ```
-*Expected: 86 passed tests covering all 10 fault types, 7 policies, tools, diagnosis, and metrics.*
+*Expected: 93 passed tests covering all 10 fault types, 7 policies, tools, diagnosis, metrics, authentication, and database persistence.*
 
 ### Frontend Tests (Vitest)
 ```powershell
 cd D:\TrustTrace\frontend
-npx vitest run
+npm test
 ```
-*Expected: 7 passed tests covering Layout, Dashboard, Form Controls, Traces, and Comparison Matrix.*
+*Expected: 9 passed tests covering SaaS Layout, Dashboard, Form Controls, Traces, and Comparison Matrix.*
+
+### End-to-End Tests (Playwright)
+```powershell
+cd D:\TrustTrace\frontend
+npx playwright test
+```
+*Executes full end-to-end user workflows across Desktop Chromium and Mobile Viewports.*
 
 ### Production Build Verification
 ```powershell
 cd D:\TrustTrace\frontend
 npm run build
 ```
+*Builds optimized, code-split production bundle using Vite and React.lazy.*
 
 ---
 

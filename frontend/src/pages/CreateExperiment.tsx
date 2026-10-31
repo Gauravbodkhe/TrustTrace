@@ -107,6 +107,9 @@ export const CreateExperiment: React.FC = () => {
   // Form State
   // Step 1: Details
   const [name, setName] = useState('Benchmark Trial: Reliability & Fault Recovery');
+  const [hypothesis, setHypothesis] = useState(
+    'Budget-aware recovery maintains >80% completion rate under intermittent 503s with minimal token overhead.'
+  );
   const [description, setDescription] = useState(
     'Testing if exponential backoff recovers from rate limits faster than immediate retry'
   );
@@ -243,6 +246,7 @@ export const CreateExperiment: React.FC = () => {
       setSubmitting(true);
       const payload: ExperimentCreate = {
         name: name.trim(),
+        hypothesis: hypothesis.trim() || undefined,
         description: description.trim(),
         agent_type: agentType,
         policy_id: policyId,
@@ -499,6 +503,31 @@ export const CreateExperiment: React.FC = () => {
                   className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   required
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Scientific Hypothesis (Optional)
+                  </label>
+                  <VoiceMicButton
+                    onTranscript={(spokenText) =>
+                      setHypothesis((prev) => (prev ? `${prev} ${spokenText}` : spokenText))
+                    }
+                    size="sm"
+                    title="Voice type scientific hypothesis"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={hypothesis}
+                  onChange={(e) => setHypothesis(e.target.value)}
+                  placeholder="e.g. Under rate limits, bounded retry achieves >80% recovery with minimal latency"
+                  className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#090d16] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Formulate expected agent recovery behavior before test execution.
+                </span>
               </div>
 
               <div>

@@ -78,6 +78,7 @@ class ScenarioSchema(BaseModel):
 
 class ExperimentCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=300)
+    hypothesis: Optional[str] = ""
     description: str = ""
     agent_type: str = Field("mock", pattern="^(mock|gemini)$")
     policy_id: str
@@ -96,6 +97,7 @@ class ExperimentSchema(BaseModel):
 
     id: str
     name: str
+    hypothesis: Optional[str] = ""
     description: str
     agent_type: str
     policy_id: str
@@ -282,4 +284,35 @@ class SampleTestCaseUpdate(BaseModel):
     recommended_policy_id: Optional[str] = None
     task_ids: Optional[List[str]] = None
     default_params: Optional[Dict[str, Any]] = None
+
+
+# ─────────────────────────── Authentication ────────────────────────────────
+
+class UserLogin(BaseModel):
+    email: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=4)
+
+
+class UserRegister(BaseModel):
+    email: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=4)
+    name: Optional[str] = "Researcher"
+
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    email: str
+    name: str
+    role: str
+    is_active: bool
+    created_at: Optional[datetime] = None
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
 

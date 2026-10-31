@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   PlusCircle,
   Layers,
+  ListChecks,
+  ShieldCheck,
   GitCompare,
+  FileText,
   Activity,
   FileCheck2,
-  FileText,
+  Mic,
   Settings as SettingsIcon,
   Database,
   Menu,
   X,
   RefreshCw,
-  Mic,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { HealthStatus } from '../types';
+import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { VoiceAssistantModal } from '../voice/VoiceAssistantModal';
 
 export const AppLayout: React.FC = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [isHealthy, setIsHealthy] = useState<boolean | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,7 +76,7 @@ export const AppLayout: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Listen for custom trigger to open voice assistant from any page
+  // Listen for custom trigger to open voice assistant modal
   useEffect(() => {
     const handleOpenVoice = () => setVoiceAssistantOpen(true);
     window.addEventListener('trusttrace:open-voice', handleOpenVoice);
@@ -92,14 +99,23 @@ export const AppLayout: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Navigation items covering the SaaS requirements while maintaining test backward compatibility
   const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/experiments/new', label: 'New Test', icon: PlusCircle },
-    { to: '/experiments', label: 'Previous Tests', icon: Layers },
-    { to: '/comparison', label: 'Compare Methods', icon: GitCompare },
-    { to: '/traces', label: 'Step-by-Step Activity', icon: Activity },
-    { to: '/evidence', label: 'Proof and Results', icon: FileCheck2 },
-    { to: '/reports', label: 'Full Reports', icon: FileText },
+    { to: '/', label: 'Overview', sublabel: 'Dashboard', icon: LayoutDashboard },
+    { to: '/experiments/new', label: 'New Experiment', sublabel: 'New Test', icon: PlusCircle },
+    { to: '/experiments', label: 'Experiment History', sublabel: 'Previous Tests', icon: Layers },
+    { to: '/test-cases', label: 'Test Case Library', sublabel: 'Standard Benchmarks', icon: ListChecks },
+    { to: '/strategies', label: 'Recovery Strategies', sublabel: '7 Policies', icon: ShieldCheck },
+    { to: '/comparison', label: 'Benchmark Comparison', sublabel: 'Compare Methods', icon: GitCompare },
+    { to: '/reports', label: 'Reports and Analytics', sublabel: 'Full Reports', icon: FileText },
+    { to: '/voice', label: 'Voice Assistant', sublabel: 'Speech AI', icon: Mic },
+    { to: '/traces', label: 'Step-by-Step Activity', sublabel: 'Traces', icon: Activity },
+    { to: '/evidence', label: 'Proof and Results', sublabel: 'Audit', icon: FileCheck2 },
     { to: '/settings', label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -115,7 +131,7 @@ export const AppLayout: React.FC = () => {
         <NavLink
           to="/"
           className={`flex items-center group transition-all min-w-0 ${isFolded ? 'justify-center' : 'space-x-3'}`}
-          title={isFolded ? 'TrustTrace v0.1 • Test how AI handles errors' : undefined}
+          title={isFolded ? 'TrustTrace • AI Agent Reliability & Recovery' : undefined}
         >
           <div className="h-9 w-9 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 border border-indigo-600/20 dark:border-indigo-500/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold group-hover:scale-105 transition-transform shadow-xs flex-shrink-0">
             <Layers className="h-5 w-5" />
@@ -142,7 +158,7 @@ export const AppLayout: React.FC = () => {
         {!isFolded && !isMobile && (
           <button
             onClick={toggleSidebarFold}
-            className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+            className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 cursor-pointer"
             title="Fold sidebar (Ctrl+B)"
             aria-label="Fold navigation sidebar"
           >
@@ -188,14 +204,14 @@ export const AppLayout: React.FC = () => {
               key={item.to}
               to={item.to}
               title={isFolded ? item.label : undefined}
-              className={`flex items-center rounded-lg text-xs font-medium transition-all group relative ${
+              className={`flex items-center rounded-xl text-xs font-medium transition-all group relative ${
                 isFolded
                   ? 'justify-center p-2.5 my-1'
                   : 'space-x-3 px-3 py-2.5'
               } ${
                 isActive
-                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/50 shadow-2xs font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/50 shadow-2xs font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800/50'
               }`}
             >
               <Icon
@@ -206,7 +222,17 @@ export const AppLayout: React.FC = () => {
                 }`}
               />
 
-              {!isFolded && <span className="truncate">{item.label}</span>}
+              {!isFolded && (
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate">{item.label}</span>
+                  {item.sublabel && (
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate hidden xl:inline">
+                      {item.sublabel}
+                    </span>
+                  )}
+                  {item.sublabel && <span className="sr-only">{item.sublabel}</span>}
+                </div>
+              )}
 
               {/* Floating Tooltip Pill when sidebar is folded */}
               {isFolded && (
@@ -219,6 +245,54 @@ export const AppLayout: React.FC = () => {
         })}
       </nav>
 
+      {/* User Session Bar */}
+      <div className={`border-t border-slate-200 dark:border-slate-800/80 ${isFolded ? 'p-2 flex justify-center' : 'p-3'}`}>
+        {isAuthenticated && user ? (
+          isFolded ? (
+            <button
+              onClick={handleLogout}
+              title={`Logged in as ${user.name || user.email} • Click to logout`}
+              className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          ) : (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-bold flex items-center justify-center text-xs shrink-0">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                    {user.name || 'Researcher'}
+                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )
+        ) : (
+          !isFolded && (
+            <NavLink
+              to="/login"
+              className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors"
+            >
+              <UserIcon className="h-3.5 w-3.5" />
+              <span>Sign In</span>
+            </NavLink>
+          )
+        )}
+      </div>
+
       {/* Bottom Live System Telemetry Card */}
       <div
         className={`border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0a0f1d] transition-all ${
@@ -227,13 +301,12 @@ export const AppLayout: React.FC = () => {
       >
         {isFolded ? (
           <div className="flex flex-col items-center space-y-2 py-1">
-            {/* Status dot with tooltip */}
             <button
               onClick={checkHealth}
               title={`Engine: ${isHealthy === true ? 'Online' : isHealthy === false ? 'Offline' : 'Connecting'} • DB: ${
-                health?.database === 'ok' ? 'SQLite (WAL)' : 'Offline'
+                health?.database === 'ok' ? (health?.db_type === 'postgresql' ? 'PostgreSQL' : 'SQLite') : 'Offline'
               } • Click to ping`}
-              className="relative p-2 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors group"
+              className="relative p-2 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors group cursor-pointer"
             >
               <span
                 className={`block h-2.5 w-2.5 rounded-full ${
@@ -244,27 +317,18 @@ export const AppLayout: React.FC = () => {
                     : 'bg-amber-500 animate-pulse'
                 }`}
               />
-              <div className="absolute left-full ml-3 px-2.5 py-1 rounded-md bg-slate-900 text-white dark:bg-slate-800 text-[11px] font-sans font-medium shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap border border-slate-700/60">
-                {isHealthy === true ? 'System Online' : 'System Offline'} • Click to ping
-              </div>
             </button>
 
-            {/* Quick Unfold Button at bottom */}
             <button
               onClick={toggleSidebarFold}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors group relative"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors group relative cursor-pointer"
               title="Expand sidebar (Ctrl+B)"
-              aria-label="Expand sidebar"
             >
               <PanelLeftOpen className="h-4 w-4" />
-              <div className="absolute left-full ml-3 px-2.5 py-1 rounded-md bg-slate-900 text-white dark:bg-slate-800 text-[11px] font-sans font-medium shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap border border-slate-700/60">
-                Expand Sidebar (Ctrl+B)
-              </div>
             </button>
           </div>
         ) : (
-          <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-2.5 space-y-2 text-[11px] bg-white dark:bg-slate-900/60 shadow-xs">
-            {/* Engine Online Status */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-2.5 space-y-2 text-[11px] bg-white dark:bg-slate-900/60 shadow-xs">
             <div className="flex items-center justify-between">
               <span className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 font-mono">
                 <span
@@ -288,23 +352,24 @@ export const AppLayout: React.FC = () => {
               <button
                 onClick={checkHealth}
                 title="Ping backend"
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5 rounded"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5 rounded cursor-pointer"
               >
                 <RefreshCw className="h-3 w-3" />
               </button>
             </div>
 
-            {/* Database and Agent Mode Sub-pills */}
             <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800/60 space-y-1 font-mono text-[10px] text-slate-500 dark:text-slate-400">
               <div className="flex items-center justify-between">
                 <span>Database:</span>
-                <span className={`font-semibold ${
-                  health?.database === 'ok'
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : isHealthy === false
-                    ? 'text-rose-600 dark:text-rose-400'
-                    : 'text-amber-500'
-                }`}>
+                <span
+                  className={`font-semibold ${
+                    health?.database === 'ok'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : isHealthy === false
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : 'text-amber-500'
+                  }`}
+                >
                   {health?.database === 'ok'
                     ? `Online (${health?.db_type === 'postgresql' ? 'PostgreSQL' : 'SQLite'})`
                     : isHealthy === false
@@ -313,9 +378,9 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Mode:</span>
+                <span>AI Mode:</span>
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                  {health?.mock_mode ? 'Fast Simulation (Free)' : 'Real Gemini AI'}
+                  {health?.mock_mode ? 'Deterministic Mock' : 'Gemini Hybrid'}
                 </span>
               </div>
             </div>
@@ -336,7 +401,7 @@ export const AppLayout: React.FC = () => {
         {renderSidebar(sidebarFolded, false)}
       </aside>
 
-      {/* Mobile Drawer (Responsive Overlay - Always full width) */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
@@ -351,22 +416,20 @@ export const AppLayout: React.FC = () => {
 
       {/* Main App Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Navigation Bar */}
+        {/* Top Header */}
         <header className="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-[#0c121e]/90 backdrop-blur-xs px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-10">
           <div className="flex items-center space-x-3 min-w-0">
-            {/* Hamburger Button for Mobile */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               aria-label="Open navigation menu"
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Desktop Fold / Expand Toggle Button in Top Header */}
             <button
               onClick={toggleSidebarFold}
-              className="hidden lg:flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+              className="hidden lg:flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
               title={sidebarFolded ? 'Expand Sidebar (Ctrl+B)' : 'Fold Sidebar (Ctrl+B)'}
               aria-label={sidebarFolded ? 'Expand Sidebar' : 'Fold Sidebar'}
             >
@@ -377,27 +440,30 @@ export const AppLayout: React.FC = () => {
               )}
             </button>
 
-            {/* Breadcrumb Trail */}
             <Breadcrumbs />
           </div>
 
           {/* Right Action Cluster */}
           <div className="flex items-center space-x-2.5">
             {/* Database indicator */}
-            <div className={`hidden sm:flex items-center space-x-1.5 text-xs font-mono px-2.5 py-1 rounded-lg border ${
-              health?.database === 'ok'
-                ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300'
-                : isHealthy === false
-                ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/40 text-rose-800 dark:text-rose-300'
-                : 'bg-slate-100 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-            }`}>
-              <Database className={`h-3.5 w-3.5 ${
+            <div
+              className={`hidden sm:flex items-center space-x-1.5 text-xs font-mono px-2.5 py-1 rounded-lg border ${
                 health?.database === 'ok'
-                  ? 'text-emerald-600 dark:text-emerald-400'
+                  ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300'
                   : isHealthy === false
-                  ? 'text-rose-500'
-                  : 'text-amber-500'
-              }`} />
+                  ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/40 text-rose-800 dark:text-rose-300'
+                  : 'bg-slate-100 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              <Database
+                className={`h-3.5 w-3.5 ${
+                  health?.database === 'ok'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : isHealthy === false
+                    ? 'text-rose-500'
+                    : 'text-amber-500'
+                }`}
+              />
               <span>DB:</span>
               <span className="font-semibold">
                 {health?.database === 'ok'
@@ -411,30 +477,30 @@ export const AppLayout: React.FC = () => {
             {/* Voice Assistant Header Trigger */}
             <button
               onClick={() => setVoiceAssistantOpen(true)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-2xs group"
-              title="Open TrustTrace Voice Assistant (Natural commands & speech synthesis)"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-2xs group cursor-pointer"
+              title="Open Voice Assistant Modal"
               aria-label="Open Voice Assistant"
             >
               <Mic className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Voice Assistant</span>
+              <span className="hidden sm:inline">Voice Copilot</span>
             </button>
 
             {/* Theme Toggle Button */}
             <ThemeToggle />
 
-            {/* New Experiment Quick CTA */}
+            {/* New Experiment CTA */}
             <NavLink
               to="/experiments/new"
-              className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors shadow-xs shadow-indigo-600/30 flex items-center space-x-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shadow-xs shadow-indigo-600/30 flex items-center space-x-1.5"
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">New Test</span>
+              <span className="hidden sm:inline">New Experiment</span>
               <span className="sm:hidden">New</span>
             </NavLink>
           </div>
         </header>
 
-        {/* Page Viewport */}
+        {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 dark:bg-[#080c14] transition-colors">
           <Outlet />
         </main>

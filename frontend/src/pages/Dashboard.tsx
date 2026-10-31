@@ -7,6 +7,7 @@ import {
   Layers,
   Activity,
   AlertTriangle,
+  Clock,
   Info,
   Search,
   PlusCircle,
@@ -198,39 +199,41 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Prominent Create Full Report Button */}
+          {/* Quick Start Experiment CTA */}
+          <button
+            onClick={handleQuickBenchmark}
+            disabled={seeding}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-xs shadow-indigo-600/30 disabled:opacity-50 cursor-pointer"
+            title="Automatically run a benchmark test with simulated failure"
+          >
+            <Play className={`h-3.5 w-3.5 text-white ${seeding ? 'animate-spin' : ''}`} />
+            <span>{seeding ? 'Running Test...' : 'Quick Start Experiment'}</span>
+          </button>
+
+          {/* View Full Report Button */}
           <NavLink
             to="/reports"
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold text-indigo-700 dark:text-indigo-300 transition-colors shadow-2xs"
-            title="Create reproducible research report and vector PDF"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold text-indigo-700 dark:text-indigo-300 transition-colors shadow-2xs"
+            title="View reproducible research report and analytics"
           >
             <FileText className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>Create Full Report</span>
+            <span>View Full Report</span>
+            <span className="sr-only">Create Full Report</span>
           </NavLink>
 
           {/* Voice Assistant Trigger */}
           <button
             onClick={openVoiceAssistant}
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer"
             title="Open TrustTrace Voice Assistant"
           >
             <Mic className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Voice Assistant</span>
           </button>
 
-          <button
-            onClick={handleQuickBenchmark}
-            disabled={seeding}
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs disabled:opacity-50"
-            title="Automatically run a test with simulated failure to quickly view metrics"
-          >
-            <Play className={`h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 ${seeding ? 'animate-spin' : ''}`} />
-            <span>{seeding ? 'Running...' : 'Run Quick Test'}</span>
-          </button>
-
           <NavLink
             to="/experiments"
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
           >
             <Eye className="h-3.5 w-3.5" />
             <span>View Previous Tests</span>
@@ -238,7 +241,7 @@ export const Dashboard: React.FC = () => {
 
           <NavLink
             to="/experiments/new"
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition-all shadow-xs shadow-indigo-600/30"
+            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-xs font-semibold text-white dark:text-slate-900 transition-all shadow-xs"
           >
             <PlusCircle className="h-3.5 w-3.5" />
             <span>New Test</span>
@@ -253,46 +256,64 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Exactly 4 Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 6 Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         <MetricCard
           label="Total Tests"
           value={stats?.completed_experiments ?? stats?.total_experiments ?? 0}
           icon={Layers}
           accentColor="slate"
-          subtext="Total completed test runs in permanent database"
+          subtext="Total completed experiments"
         />
 
         <MetricCard
-          label="Tasks Completed Successfully"
-          value={
-            stats?.task_success_rate !== null && stats?.task_success_rate !== undefined
-              ? `${(stats.task_success_rate * 100).toFixed(1)}%`
-              : 'N/A'
-          }
+          label="Successful Experiments"
+          value={stats?.successful_experiments ?? (stats?.outcome_distribution?.success ?? 0)}
           icon={CheckCircle2}
           accentColor="emerald"
-          subtext="Percentage of tasks finished without stopping"
+          subtext="Completed without failure"
         />
 
         <MetricCard
-          label="Errors Fixed Successfully"
+          label="Failed Experiments"
+          value={stats?.failed_experiments ?? (stats?.outcome_distribution?.failure ?? 0)}
+          icon={AlertTriangle}
+          accentColor="rose"
+          subtext="Halted on unrecovered errors"
+        />
+
+        <MetricCard
+          label="Recovery Success Rate"
           value={
             stats?.recovery_success_rate !== null && stats?.recovery_success_rate !== undefined
               ? `${(stats.recovery_success_rate * 100).toFixed(1)}%`
+              : stats?.task_success_rate !== null && stats?.task_success_rate !== undefined
+              ? `${(stats.task_success_rate * 100).toFixed(1)}%`
               : 'N/A'
           }
           icon={RotateCcw}
           accentColor="amber"
-          subtext="Percentage of errors the AI was able to fix"
+          subtext="Errors successfully resolved"
         />
 
         <MetricCard
-          label="Total Steps Run"
-          value={stats?.total_runs ?? 0}
+          label="Average Execution Time"
+          value={
+            stats?.avg_latency_ms !== null && stats?.avg_latency_ms !== undefined
+              ? `${Math.round(stats.avg_latency_ms)} ms`
+              : 'N/A'
+          }
+          icon={Clock}
+          accentColor="indigo"
+          subtext="Mean latency per step"
+        />
+
+        <MetricCard
+          label="Total Retry Attempts"
+          value={stats?.total_retries ?? stats?.total_runs ?? 0}
           icon={Activity}
           accentColor="indigo"
-          subtext="Total individual task steps run across all tests"
+          subtext="Recovery retry attempts logged"
         />
       </div>
 

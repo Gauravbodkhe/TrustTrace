@@ -10,10 +10,17 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${BASE_URL}${cleanPath}`;
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('trusttrace_token') : null;
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
   let res: Response;
   try {
     res = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...options?.headers,
+      },
       ...options,
     });
   } catch (err: any) {
@@ -42,6 +49,29 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<import('../types').HealthStatus>('/health'),
+
+  // ─── Authentication ────────────────────────────────────────────────────────
+  auth: {
+    login: (data: { email: string; password: string }) =>
+      request<import('../types').TokenResponse>('/api/v1/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    register: (data: { email: string; password: string; name?: string }) =>
+      request<import('../types').TokenResponse>('/api/v1/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    demo: () =>
+      request<import('../types').TokenResponse>('/api/v1/auth/demo', {
+        method: 'POST',
+      }),
+    me: () => request<import('../types').User>('/api/v1/auth/me'),
+    logout: () =>
+      request<{ status: string; message: string }>('/api/v1/auth/logout', {
+        method: 'POST',
+      }),
+  },
 
   // ─── Tasks ────────────────────────────────────────────────────────────────
   tasks: {

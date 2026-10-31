@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.db import init_db, SessionLocal, get_db_type
 from app.db import repository as repo
-from app.api.routes import health, experiments, scenarios, traces, metrics, exports, evidence, reports, test_cases
+from app.api.routes import health, experiments, scenarios, traces, metrics, exports, evidence, reports, test_cases, auth
 
 
 @asynccontextmanager
@@ -24,11 +24,12 @@ async def lifespan(app: FastAPI):
     # Initialize database tables
     init_db()
 
-    # Seed benchmark data & sample test cases
+    # Seed benchmark data, sample test cases & default researcher user
     with SessionLocal() as db:
         task_count = repo.seed_benchmark_tasks(db)
         scenario_count = repo.seed_scenarios(db)
         sample_tc_count = repo.seed_sample_test_cases(db)
+        repo.seed_default_user(db)
         db.commit()
         logger.info(
             "Database ready: %d benchmark tasks, %d fault scenarios, %d sample test cases loaded",
@@ -70,6 +71,7 @@ app.add_middleware(
 )
 
 # Register routes
+app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(experiments.router)
 app.include_router(scenarios.router)

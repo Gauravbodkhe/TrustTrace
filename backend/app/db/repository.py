@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     Experiment, ExperimentRun, ExecutionTrace,
-    RecoveryDecision, FaultScenario, Task, MetricSummary, SampleTestCase
+    RecoveryDecision, FaultScenario, Task, MetricSummary, SampleTestCase, User
 )
 from app.services.agent_runner import RunResult, TraceStep, RecoveryRecord
 
@@ -613,6 +613,7 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
     completed_experiments = db.execute(select(func.count(Experiment.id)).where(Experiment.status == "completed")).scalar() or 0
     total_runs = db.execute(select(func.count(ExperimentRun.id))).scalar() or 0
     total_sample_cases = db.execute(select(func.count(SampleTestCase.id))).scalar() or 0
+    total_retries = db.execute(select(func.sum(ExperimentRun.retry_count))).scalar() or 0
 
     outcomes = db.execute(
         select(ExperimentRun.outcome, func.count(ExperimentRun.id).label("cnt"))
@@ -620,6 +621,16 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
     )
     outcome_counts = {row.outcome: row.cnt for row in outcomes if row.outcome}
     success_count = outcome_counts.get("success", 0)
+
+    # Experiments with successful runs vs failed
+    success_exp_subquery = select(ExperimentRun.experiment_id).where(ExperimentRun.outcome == "success").distinct()
+    successful_experiments = db.execute(
+        select(func.count(Experiment.id))
+        .where(Experiment.status == "completed")
+        .where(Experiment.id.in_(success_exp_subquery))
+    ).scalar() or 0
+
+    failed_experiments = max(0, completed_experiments - successful_experiments)
 
     task_success_rate = (success_count / total_runs) if total_runs > 0 else None
 
@@ -674,8 +685,11 @@ def get_dashboard_stats(db: Session) -> Dict[str, Any]:
     return {
         "total_experiments": total_experiments,
         "completed_experiments": completed_experiments,
+        "successful_experiments": successful_experiments,
+        "failed_experiments": failed_experiments,
         "total_sample_cases": total_sample_cases,
         "total_runs": total_runs,
+        "total_retries": total_retries,
         "task_success_rate": round(task_success_rate, 4) if task_success_rate is not None else None,
         "recovery_success_rate": recovery_success_rate,
         "avg_latency_ms": round(float(avg_latency), 1) if avg_latency else None,
@@ -728,6 +742,68 @@ def get_failure_distribution_stats(db: Session) -> list[dict]:
             "description": f"Simulated fault condition for {cat.replace('_', ' ')}",
         })
     return results
+
+
+# ─────────────────────────── Users & Authentication ────────────────────────
+
+import hashlib
+import os
+import hmac
+
+
+def hash_password(password: str, salt: Optional[bytes] = None) -> str:
+    """Hash password using standard PBKDF2-HMAC-SHA256 with 100,000 iterations."""
+    if salt is None:
+        salt = os.urandom(16)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100000)
+    return f"{salt.hex()}:{key.hex()}"
+
+
+def verify_password(stored_password: str, provided_password: str) -> bool:
+    """Verify provided password against stored PBKDF2 hash."""
+    try:
+        salt_hex, key_hex = stored_password.split(":")
+        salt = bytes.fromhex(salt_hex)
+        key = hashlib.pbkdf2_hmac("sha256", provided_password.encode("utf-8"), salt, 100000)
+        return hmac.compare_digest(key.hex(), key_hex)
+    except Exception:
+        return False
+
+
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
+    return db.execute(select(User).where(User.email == email.lower().strip())).scalar_one_or_none()
+
+
+def create_user(db: Session, email: str, password: str, name: str = "Researcher", role: str = "researcher") -> User:
+    hashed = hash_password(password)
+    user = User(
+        id=str(uuid.uuid4()),
+        email=email.lower().strip(),
+        name=name,
+        hashed_password=hashed,
+        role=role,
+        is_active=True,
+    )
+    db.add(user)
+    db.flush()
+    return user
+
+
+def seed_default_user(db: Session) -> Optional[User]:
+    """Seed demo/default researcher account if no users exist."""
+    admin_email = "researcher@trusttrace.ai"
+    existing = get_user_by_email(db, admin_email)
+    if existing is None:
+        user = create_user(
+            db,
+            email=admin_email,
+            password="TrustTracePassword123!",
+            name="Lead Researcher",
+            role="admin",
+        )
+        db.flush()
+        return user
+    return existing
 
 
 def list_all_runs(
