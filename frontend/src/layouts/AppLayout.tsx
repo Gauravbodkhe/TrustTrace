@@ -104,19 +104,13 @@ export const AppLayout: React.FC = () => {
     navigate('/login');
   };
 
-  // Navigation items covering the SaaS requirements while maintaining test backward compatibility
+  // Exactly 5 clean, focused main navigation items as requested
   const navItems = [
-    { to: '/', label: 'Overview', sublabel: 'Dashboard', icon: LayoutDashboard },
+    { to: '/', label: 'Dashboard', sublabel: 'Overview', icon: LayoutDashboard },
     { to: '/experiments/new', label: 'New Experiment', sublabel: 'New Test', icon: PlusCircle },
-    { to: '/experiments', label: 'Experiment History', sublabel: 'Previous Tests', icon: Layers },
-    { to: '/test-cases', label: 'Test Case Library', sublabel: 'Standard Benchmarks', icon: ListChecks },
-    { to: '/strategies', label: 'Recovery Strategies', sublabel: '7 Policies', icon: ShieldCheck },
-    { to: '/comparison', label: 'Benchmark Comparison', sublabel: 'Compare Methods', icon: GitCompare },
-    { to: '/reports', label: 'Reports and Analytics', sublabel: 'Full Reports', icon: FileText },
-    { to: '/voice', label: 'Voice Assistant', sublabel: 'Speech AI', icon: Mic },
-    { to: '/traces', label: 'Step-by-Step Activity', sublabel: 'Traces', icon: Activity },
-    { to: '/evidence', label: 'Proof and Results', sublabel: 'Audit', icon: FileCheck2 },
-    { to: '/settings', label: 'Settings', icon: SettingsIcon },
+    { to: '/test-cases', label: 'Test Cases', sublabel: 'Standard Benchmarks', icon: ListChecks },
+    { to: '/experiments', label: 'Previous Experiments', sublabel: 'Previous Tests', icon: Layers },
+    { to: '/reports', label: 'Reports', sublabel: 'Full Reports', icon: FileText },
   ];
 
   // Helper to render the sidebar content

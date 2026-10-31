@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # Database (SQLite default for local development, Supabase PostgreSQL for production)
     DATABASE_URL: str = "sqlite:///./trusttrace.db"
+    SQLITE_DB_PATH: Optional[str] = None
 
     # Supabase (optional)
     SUPABASE_URL: Optional[str] = None

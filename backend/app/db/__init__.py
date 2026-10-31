@@ -12,7 +12,22 @@ from app.models import Base
 logger = logging.getLogger(__name__)
 
 # Normalize sqlite URL or postgres URL
-raw_url = (settings.DATABASE_URL or "sqlite:///./trusttrace.db").strip()
+raw_url = os.getenv("DATABASE_URL", settings.DATABASE_URL or "sqlite:///./trusttrace.db").strip()
+
+# Check for persistent storage path on Render or container disk mount
+sqlite_override = os.getenv("SQLITE_DB_PATH") or getattr(settings, "SQLITE_DB_PATH", None)
+if not sqlite_override and ("sqlite" in raw_url or raw_url == "sqlite:///./trusttrace.db"):
+    if os.path.exists("/data") and os.access("/data", os.W_OK):
+        sqlite_override = "/data/trusttrace.db"
+    elif os.path.exists("/var/data") and os.access("/var/data", os.W_OK):
+        sqlite_override = "/var/data/trusttrace.db"
+
+if sqlite_override and ("sqlite" in raw_url or raw_url == "sqlite:///./trusttrace.db"):
+    norm_path = os.path.abspath(sqlite_override).replace("\\", "/")
+    if not norm_path.startswith("/"):
+        norm_path = f"/{norm_path}"
+    raw_url = f"sqlite:///{norm_path}"
+    logger.info("Using persistent SQLite database at %s", sqlite_override)
 
 if raw_url.startswith("sqlite+aiosqlite://"):
     db_url = raw_url.replace("sqlite+aiosqlite://", "sqlite://")

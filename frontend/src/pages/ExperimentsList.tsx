@@ -65,7 +65,8 @@ export const ExperimentsList: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2.5">
             <Layers className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            <span>Previous Tests</span>
+            <span>Previous Experiments</span>
+            <span className="sr-only">Previous Tests</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             View, search, and check results from all previous tests.

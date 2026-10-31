@@ -294,16 +294,16 @@ TrustTrace includes 10 pre-configured sample test cases permanently stored in th
 
 | Case ID | Test Name | Injected Fault | Expected Recovery | Recommended Policy |
 | :--- | :--- | :--- | :--- | :--- |
-| **TC-001** | API Timeout | Tool call exceeds deadline (timeout) | Bounded Retry | Policy B: Bounded Retry |
-| **TC-002** | Tool Unavailable | Service outage (HTTP 503) | Fallback | Policy D: Fallback |
-| **TC-003** | Malformed JSON | Syntax error in tool JSON response | Validation and Retry | Policy C: Validation Retry |
-| **TC-004** | Missing Fields | Required schema fields absent | Validation | Policy C: Validation Retry |
-| **TC-005** | Invalid Arguments | Invalid parameter types provided | Safe Stop | Policy E: Safe Stop |
-| **TC-006** | Empty Response | HTTP 200 returned with `{}` body | Retry or Fallback | Policy D: Fallback |
-| **TC-007** | Stale Data | Data age exceeds 72h threshold | Validate Freshness | Policy C: Validation Retry |
-| **TC-008** | Rate Limit | HTTP 429 quota exhaustion | Budget-Aware Recovery | Policy G: Budget-Aware |
-| **TC-009** | Authentication Failure | HTTP 401 unauthorized / expired key | Safe Stop | Policy E: Safe Stop |
-| **TC-010** | Network Failure | Socket reset (ECONNRESET) | Bounded Retry | Policy B: Bounded Retry |
+| **TC-001** | Timeout at Step 1 | Tool call exceeds deadline at step 1 | Bounded Retry | Policy B: Bounded Retry |
+| **TC-002** | Tool Unavailable at Step 2 | Service outage (HTTP 503) at step 2 | Fallback | Policy D: Fallback |
+| **TC-003** | Malformed JSON | Syntax error in tool JSON response at step 1 | Validation and Retry | Policy C: Validation Retry |
+| **TC-004** | Missing Response Fields | Required schema fields absent at step 2 | Validation and Retry | Policy C: Validation Retry |
+| **TC-005** | Invalid Arguments | Invalid parameter types provided at step 1 | Safe Stop | Policy E: Safe Stop |
+| **TC-006** | Empty Response | HTTP 200 returned with `{}` body at step 2 | Retry or Fallback | Policy D: Fallback |
+| **TC-007** | Stale Data | Data age exceeds 72h threshold at step 1 | Validate Freshness | Policy C: Validation Retry |
+| **TC-008** | Transient Error | Transient HTTP 503 error at step 1 | Bounded Retry | Policy B: Bounded Retry |
+| **TC-009** | Rate Limit | HTTP 429 quota exhaustion at step 1 | Budget-Aware Recovery | Policy G: Budget-Aware |
+| **TC-010** | Schema Validation Failure | Response failed type validation at step 2 | Validation and Retry | Policy C: Validation Retry |
 
 - **No fake results:** Sample cases remain purely configuration templates until explicitly run. Actual traces and metrics are saved only upon execution.
 - **Idempotent restarts:** Seeding checks primary keys (`TC-001` .. `TC-010`) to prevent duplicate records upon backend restarts.

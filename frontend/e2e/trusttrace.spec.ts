@@ -220,8 +220,8 @@ test.describe('TrustTrace End-to-End Test Suite', () => {
     await expect(page.getByText('Total Retry Attempts')).toBeVisible();
 
     // Verify Action CTA buttons
-    await expect(page.getByRole('button', { name: /quick start experiment/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /view full report/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /quick start experiment/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /view full report/i }).first()).toBeVisible();
 
     // Verify Comparison Chart Section
     await expect(page.getByText(/compare error-handling methods/i)).toBeVisible();
@@ -230,7 +230,7 @@ test.describe('TrustTrace End-to-End Test Suite', () => {
   test('3. Test Case Library: Displays 10 standard benchmarks with execution capability', async ({ page }) => {
     await page.goto('/test-cases');
 
-    await expect(page.getByRole('heading', { name: /test case library/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /test case/i })).toBeVisible();
     await expect(page.getByText(/10 standard benchmarks/i)).toBeVisible();
 
     // Verify test case items (TC-001 through TC-010)
@@ -342,9 +342,11 @@ test.describe('TrustTrace End-to-End Test Suite', () => {
     await expect(hamburger).toBeVisible();
     await hamburger.click();
 
-    // Expect drawer to open and display navigation links
-    await expect(page.getByRole('link', { name: /overview/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /test case library/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /recovery strategies/i })).toBeVisible();
+    // Expect drawer to open and display the 5 simplified navigation links
+    await expect(page.getByRole('link', { name: /dashboard/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /new experiment/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /test cases/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /previous experiments/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /reports/i }).first()).toBeVisible();
   });
 });

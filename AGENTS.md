@@ -127,16 +127,16 @@ d:\TrustTrace\
 ## 4. Built-in Benchmark Test Cases (TC-001 - TC-010)
 
 The system automatically initializes 10 benchmark test cases in the database:
-1. `TC-001`: API Timeout $\rightarrow$ Expected recovery: **Bounded Retry**
-2. `TC-002`: Tool Unavailable $\rightarrow$ Expected recovery: **Fallback**
+1. `TC-001`: Timeout at Step 1 $\rightarrow$ Expected recovery: **Bounded Retry**
+2. `TC-002`: Tool Unavailable at Step 2 $\rightarrow$ Expected recovery: **Fallback**
 3. `TC-003`: Malformed JSON $\rightarrow$ Expected recovery: **Validation and Retry**
-4. `TC-004`: Missing Fields $\rightarrow$ Expected recovery: **Validation and Retry**
+4. `TC-004`: Missing Response Fields $\rightarrow$ Expected recovery: **Validation and Retry**
 5. `TC-005`: Invalid Arguments $\rightarrow$ Expected recovery: **Safe Stop**
 6. `TC-006`: Empty Response $\rightarrow$ Expected recovery: **Retry or Fallback**
 7. `TC-007`: Stale Data $\rightarrow$ Expected recovery: **Validate Freshness**
-8. `TC-008`: Rate Limit $\rightarrow$ Expected recovery: **Budget-Aware Recovery**
-9. `TC-009`: Authentication Failure $\rightarrow$ Expected recovery: **Safe Stop**
-10. `TC-010`: Network Failure $\rightarrow$ Expected recovery: **Bounded Retry**
+8. `TC-008`: Transient Error $\rightarrow$ Expected recovery: **Bounded Retry**
+9. `TC-009`: Rate Limit $\rightarrow$ Expected recovery: **Budget-Aware Recovery**
+10. `TC-010`: Schema Validation Failure $\rightarrow$ Expected recovery: **Validation and Retry**
 
 ---
 

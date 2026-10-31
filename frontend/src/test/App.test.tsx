@@ -135,13 +135,10 @@ describe('TrustTrace Frontend Suite', () => {
     expect(screen.getAllByText('TrustTrace')[0]).toBeInTheDocument();
     expect(screen.getByText('Test how AI handles errors')).toBeInTheDocument();
     expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('New Test')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Previous Tests')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Compare Methods')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Step-by-Step Activity')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Proof and Results')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Full Reports')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Settings')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('New Experiment')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Test Cases')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Previous Experiments')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Reports')[0]).toBeInTheDocument();
   });
 
   it('renders dashboard KPI cards and metrics from API', async () => {

@@ -88,8 +88,8 @@ def create_scenario(db: Session, data: Any) -> FaultScenario:
 SAMPLE_TEST_CASES = [
     {
         "id": "TC-001",
-        "name": "API Timeout",
-        "description": "Simulates external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
+        "name": "Timeout at Step 1",
+        "description": "Simulates an external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
         "fault_category": "timeout",
         "scenario_id": "timeout_step1",
         "expected_recovery": "Bounded Retry",
@@ -100,7 +100,7 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-002",
-        "name": "Tool Unavailable",
+        "name": "Tool Unavailable at Step 2",
         "description": "Simulates complete service outage (HTTP 503) at step 2. Evaluates dynamic failover to registered backup tool.",
         "fault_category": "tool_unavailable",
         "scenario_id": "tool_unavailable_step2",
@@ -124,11 +124,11 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-004",
-        "name": "Missing Fields",
+        "name": "Missing Response Fields",
         "description": "Tool returns partial payload missing required keys at step 2. Evaluates schema validation failure detection.",
         "fault_category": "missing_fields",
         "scenario_id": "missing_fields_step2",
-        "expected_recovery": "Validation",
+        "expected_recovery": "Validation and Retry",
         "recommended_policy_id": "policy_c_validation_retry",
         "task_ids": ["task_order_lookup"],
         "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
@@ -172,6 +172,18 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-008",
+        "name": "Transient Error",
+        "description": "Step 1 returns transient 503 error that recovers on retry. Evaluates bounded retry resilience.",
+        "fault_category": "transient_error",
+        "scenario_id": "transient_error_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-009",
         "name": "Rate Limit",
         "description": "Tool returns HTTP 429 quota exhaustion. Evaluates budget-aware backoff respecting execution budget.",
         "fault_category": "rate_limit",
@@ -183,26 +195,14 @@ SAMPLE_TEST_CASES = [
         "is_sample": True,
     },
     {
-        "id": "TC-009",
-        "name": "Authentication Failure",
-        "description": "Simulates HTTP 401 Unauthorized or expired credentials at step 1. Evaluates immediate safe stop.",
-        "fault_category": "auth_failure",
-        "scenario_id": "auth_failure_step1",
-        "expected_recovery": "Safe Stop",
-        "recommended_policy_id": "policy_e_safe_stop",
-        "task_ids": ["task_order_lookup"],
-        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
-        "is_sample": True,
-    },
-    {
         "id": "TC-010",
-        "name": "Network Failure",
-        "description": "Simulates socket reset (ECONNRESET) at step 1. Evaluates bounded reconnection retry.",
-        "fault_category": "network_failure",
-        "scenario_id": "network_failure_step1",
-        "expected_recovery": "Bounded Retry",
-        "recommended_policy_id": "policy_b_bounded_retry",
-        "task_ids": ["task_expense_policy"],
+        "name": "Schema Validation Failure",
+        "description": "Step 2 output fails schema validation with mismatched types. Evaluates validation and retry.",
+        "fault_category": "schema_validation",
+        "scenario_id": "schema_validation_step2",
+        "expected_recovery": "Validation and Retry",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_cost_analysis"],
         "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
         "is_sample": True,
     },
@@ -210,7 +210,7 @@ SAMPLE_TEST_CASES = [
 
 
 def seed_sample_test_cases(db: Session) -> int:
-    """Insert built-in sample test cases if they don't exist. Idempotent across restarts."""
+    """Insert built-in sample test cases if they don't exist, or update them idempotently across restarts."""
     inserted = 0
     for tc_data in SAMPLE_TEST_CASES:
         existing = db.get(SampleTestCase, tc_data["id"])
@@ -218,6 +218,11 @@ def seed_sample_test_cases(db: Session) -> int:
             tc = SampleTestCase(**tc_data)
             db.add(tc)
             inserted += 1
+        elif existing.is_sample:
+            # Keep record intact while updating canonical fields
+            for key, val in tc_data.items():
+                if hasattr(existing, key):
+                    setattr(existing, key, val)
     db.flush()
     return inserted
 
@@ -272,8 +277,8 @@ def update_scenario(db: Session, scenario_id: str, updates: Any) -> Optional[Fau
 SAMPLE_TEST_CASES = [
     {
         "id": "TC-001",
-        "name": "API Timeout",
-        "description": "Simulates external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
+        "name": "Timeout at Step 1",
+        "description": "Simulates an external API call timeout at step 1. Evaluates bounded exponential backoff retry within budget.",
         "fault_category": "timeout",
         "scenario_id": "timeout_step1",
         "expected_recovery": "Bounded Retry",
@@ -284,7 +289,7 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-002",
-        "name": "Tool Unavailable",
+        "name": "Tool Unavailable at Step 2",
         "description": "Simulates complete service outage (HTTP 503) at step 2. Evaluates dynamic failover to registered backup tool.",
         "fault_category": "tool_unavailable",
         "scenario_id": "tool_unavailable_step2",
@@ -308,11 +313,11 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-004",
-        "name": "Missing Fields",
+        "name": "Missing Response Fields",
         "description": "Tool returns partial payload missing required keys at step 2. Evaluates schema validation failure detection.",
         "fault_category": "missing_fields",
         "scenario_id": "missing_fields_step2",
-        "expected_recovery": "Validation",
+        "expected_recovery": "Validation and Retry",
         "recommended_policy_id": "policy_c_validation_retry",
         "task_ids": ["task_order_lookup"],
         "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
@@ -356,6 +361,18 @@ SAMPLE_TEST_CASES = [
     },
     {
         "id": "TC-008",
+        "name": "Transient Error",
+        "description": "Step 1 returns transient 503 error that recovers on retry. Evaluates bounded retry resilience.",
+        "fault_category": "transient_error",
+        "scenario_id": "transient_error_step1",
+        "expected_recovery": "Bounded Retry",
+        "recommended_policy_id": "policy_b_bounded_retry",
+        "task_ids": ["task_expense_policy"],
+        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
+        "is_sample": True,
+    },
+    {
+        "id": "TC-009",
         "name": "Rate Limit",
         "description": "Tool returns HTTP 429 quota exhaustion. Evaluates budget-aware backoff respecting execution budget.",
         "fault_category": "rate_limit",
@@ -367,26 +384,14 @@ SAMPLE_TEST_CASES = [
         "is_sample": True,
     },
     {
-        "id": "TC-009",
-        "name": "Authentication Failure",
-        "description": "Simulates HTTP 401 Unauthorized or expired credentials at step 1. Evaluates immediate safe stop.",
-        "fault_category": "auth_failure",
-        "scenario_id": "auth_failure_step1",
-        "expected_recovery": "Safe Stop",
-        "recommended_policy_id": "policy_e_safe_stop",
-        "task_ids": ["task_order_lookup"],
-        "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
-        "is_sample": True,
-    },
-    {
         "id": "TC-010",
-        "name": "Network Failure",
-        "description": "Simulates socket reset (ECONNRESET) at step 1. Evaluates bounded reconnection retry.",
-        "fault_category": "network_failure",
-        "scenario_id": "network_failure_step1",
-        "expected_recovery": "Bounded Retry",
-        "recommended_policy_id": "policy_b_bounded_retry",
-        "task_ids": ["task_expense_policy"],
+        "name": "Schema Validation Failure",
+        "description": "Step 2 output fails schema validation with mismatched types. Evaluates validation and retry.",
+        "fault_category": "schema_validation",
+        "scenario_id": "schema_validation_step2",
+        "expected_recovery": "Validation and Retry",
+        "recommended_policy_id": "policy_c_validation_retry",
+        "task_ids": ["task_cost_analysis"],
         "default_params": {"repetitions": 1, "seed": 42, "max_retries": 3, "timeout_seconds": 30},
         "is_sample": True,
     },
@@ -394,7 +399,7 @@ SAMPLE_TEST_CASES = [
 
 
 def seed_sample_test_cases(db: Session) -> int:
-    """Insert built-in sample test cases if they don't exist. Idempotent across restarts."""
+    """Insert built-in sample test cases if they don't exist, or update them idempotently across restarts."""
     inserted = 0
     for tc_data in SAMPLE_TEST_CASES:
         existing = db.get(SampleTestCase, tc_data["id"])
@@ -402,6 +407,11 @@ def seed_sample_test_cases(db: Session) -> int:
             tc = SampleTestCase(**tc_data)
             db.add(tc)
             inserted += 1
+        elif existing.is_sample:
+            # Keep record intact while updating canonical fields
+            for key, val in tc_data.items():
+                if hasattr(existing, key):
+                    setattr(existing, key, val)
     db.flush()
     return inserted
 
